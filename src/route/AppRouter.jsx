@@ -1,3 +1,4 @@
+// src/route/AppRouter.jsx
 import { Routes, Route } from "react-router-dom";
 import Layout from "@components/Layout.jsx";
 import HomePage from "@pages/HomePage.jsx";

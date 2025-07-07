@@ -1,3 +1,4 @@
+// src/pages/ChallengePage.jsx
 import { Link } from "react-router-dom";
 
 function ChallengePage() {
