@@ -1,3 +1,4 @@
+// src/components/Sidebar.jsx
 function Sidebar() {
   return (
     <div>

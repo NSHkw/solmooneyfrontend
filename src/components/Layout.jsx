@@ -1,3 +1,4 @@
+// src/components/Layout.jsx
 import Sidebar from "@components/Sidebar.jsx";
 
 function Layout({ children }) {
