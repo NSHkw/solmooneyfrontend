@@ -9,7 +9,7 @@ import AccountBookPage from "@pages/AccountBookPage.jsx";
 import UserPage from "@pages/UserPage.jsx";
 import SubscriptionPage from "@pages/SubscriptionPage.jsx";
 import Setting from "@pages/Setting.jsx";
-import { ROUTES } from "@/route/routes.js";
+import { ROUTES } from "@route/routes.js";
 
 function AppRouter() {
   return (
