@@ -6,7 +6,7 @@ import { ROUTES } from '@route/routes';
 const NotificationPanel = ({ onClose, notificationRef }) => {
   const navigate = useNavigate();
 
-  const mockNotifications = [
+  const mockNotificationsData = [
     {
       id: 1,
       type: 'challenge',
@@ -70,7 +70,7 @@ const NotificationPanel = ({ onClose, notificationRef }) => {
       </div>
 
       <div>
-        {mockNotifications.map((item) => {
+        {mockNotificationsData.map((item) => {
           const Icon = item.icon;
           return (
             <div
