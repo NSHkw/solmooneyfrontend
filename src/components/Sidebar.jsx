@@ -7,6 +7,7 @@ import { BiBarChartAlt } from 'react-icons/bi';
 import { FiBookOpen } from 'react-icons/fi';
 import { LuNotebookPen } from 'react-icons/lu';
 import { useState } from 'react';
+import NotificationPanel from '@components/NotificationPanel';
 
 const Sidebar = ({
   isOpen,
@@ -143,6 +144,10 @@ const Sidebar = ({
 
       {/* 알림창 */}
       {isNotificationPanelOpen && (
+        <NotificationPanel onClose={onCloseNotification} notificationRef={notificationRef} />
+      )}
+
+      {/* {isNotificationPanelOpen && (
         <div
           ref={notificationRef}
           style={{
@@ -155,13 +160,11 @@ const Sidebar = ({
             zIndex: 100,
           }}
         >
-          {/* 헤더 */}
           <div style={{ display: 'flex' }}>
             <h3>알림 창</h3>
             <button onClick={onCloseNotification}>X</button>
           </div>
 
-          {/* 알림 내용 */}
           <div
             onClick={() => {
               navigate(ROUTES.CHALLENGE);
@@ -185,7 +188,7 @@ const Sidebar = ({
             구독 추가
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };

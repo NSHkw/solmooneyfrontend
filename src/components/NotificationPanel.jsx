@@ -1,11 +1,11 @@
+// src/components/NotificationPanel.jsx
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@route/routes.js';
-import { FaTimes, FaBell, FaTrophy, FaWallet, FaBookOpen } from 'react-icons/fa';
+import { FaBell, FaBookOpen, FaTrophy, FaWallet } from 'react-icons/fa';
+import { ROUTES } from '@route/routes';
 
-const NotificationPanel = ({ onClose }) => {
+const NotificationPanel = ({ onClose, notificationRef }) => {
   const navigate = useNavigate();
 
-  // 알림 mock 데이터
   const mockNotifications = [
     {
       id: 1,
@@ -22,7 +22,7 @@ const NotificationPanel = ({ onClose }) => {
       type: 'expense',
       icon: FaWallet,
       title: '월 예산 80% 사용',
-      message: '이번 달 예산의 80%를 사용했습니다. 지출을 확인해보세요.',
+      message: '이번 달 예산의 80%를 사용했습니다.',
       time: '4시간 전',
       path: ROUTES.ACCOUNT_BOOK,
       isRead: true,
@@ -49,17 +49,56 @@ const NotificationPanel = ({ onClose }) => {
     },
   ];
 
-  const HandleNotificationClick = (notification) => {
-    navigate(notification.path);
-    onClose();
-  };
+  return (
+    <div
+      ref={notificationRef}
+      style={{
+        position: 'fixed',
+        top: '20px',
+        left: '200px',
+        width: '300px',
+        height: '400px',
+        backgroundColor: 'white',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+        zIndex: 1000,
+        padding: '1rem',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <h3>알림</h3>
+        <button onClick={onClose}>X</button>
+      </div>
 
-  const HandleMarkAllAsRead = () => {
-    console.log('모든 알림을 읽음 처리');
-  };
-
-  return <div onClick={onClose}></div>
-  <div></div>
+      <div>
+        {mockNotifications.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.id}
+              onClick={() => {
+                navigate(item.path);
+                onClose();
+              }}
+              style={{
+                marginBottom: '1rem',
+                padding: '0.5rem',
+                backgroundColor: item.isRead ? '#f5f5f5' : '#e6f7ff',
+                cursor: 'pointer',
+                borderRadius: '6px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Icon size={16} />
+                <strong>{item.title}</strong>
+              </div>
+              <p style={{ margin: '4px 0', fontSize: '0.9rem' }}>{item.message}</p>
+              <span style={{ fontSize: '0.8rem', color: 'gray' }}>{item.time}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default NotificationPanel;
