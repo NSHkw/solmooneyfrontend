@@ -1,6 +1,7 @@
 // src/pages/ChallengePage.jsx
-import { useCallback, useMemo, useState } from 'react';
-import { toast } from 'react-toastify';
+import { useState, useMemo, useCallback } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const challengeStatus = {
   SUCCESS: '성공',
@@ -204,7 +205,7 @@ function ChallengePage() {
     }
   }, []);
 
-  const handleOpenModal = () => {
+  const handleOpenModal = useCallback(() => {
     console.log('모달 열기 함수');
     setIsModalOpen(true);
     setFormCurrentAmount(0);
@@ -217,9 +218,9 @@ function ChallengePage() {
       reward: '',
       contents: '',
     });
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setFormCurrentAmount(0);
     // 폼 데이터 초기화
@@ -231,24 +232,27 @@ function ChallengePage() {
       reward: '',
       contents: '',
     });
-  };
+  }, []);
 
   // 폼 데이터 변경 핸들러
-  const handleFormChange = (e) => {
+  const handleFormChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
   // startDate 변경 시 currentAmount 업데이트
-  const handleStartDateChange = (e) => {
-    const selectedStartDate = e.target.value;
-    handleFormChange(e); // 폼 데이터도 업데이트
-    const calculatedAmount = calculateCurrentAmount(selectedStartDate);
-    setFormCurrentAmount(calculatedAmount);
-  };
+  const handleStartDateChange = useCallback(
+    (e) => {
+      const selectedStartDate = e.target.value;
+      handleFormChange(e); // 폼 데이터도 업데이트
+      const calculatedAmount = calculateCurrentAmount(selectedStartDate);
+      setFormCurrentAmount(calculatedAmount);
+    },
+    [handleFormChange, calculateCurrentAmount],
+  );
 
   // 폼 validation 함수
   const validateForm = useCallback((formData) => {
@@ -275,42 +279,44 @@ function ChallengePage() {
       return false;
     }
 
-    // // 날짜 validation
-    // const start = new Date(startDate);
-    // const end = new Date(endDate);
+    // 날짜 validation
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-    // if (end <= start) {
-    //   toast.error('종료 날짜는 시작 날짜보다 늦어야 합니다.');
-    //   return false;
-    // }
+    if (end <= start) {
+      toast.error('종료 날짜는 시작 날짜보다 늦어야 합니다.');
+      return false;
+    }
 
     return true;
   }, []);
 
   // 챌린지 추가 모달
-  const handleCreateChallenge = (e) => {
-    e.preventDefault();
+  const handleCreateChallenge = useCallback(
+    (e) => {
+      e.preventDefault();
 
-    // validation 체크
-    if (!validateForm(formData)) {
-      console.log('eeeeeee');
-      return; // validation 실패 시 폼 데이터 유지하고 모달도 유지
-    }
+      // validation 체크
+      if (!validateForm(formData)) {
+        return; // validation 실패 시 폼 데이터 유지하고 모달도 유지
+      }
 
-    const newChallenge = {
-      id: Date.now(), // 임시 ID
-      title: formData.title,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      targetAmount: parseInt(formData.targetAmount),
-      reward: parseInt(formData.reward) || 0,
-      contents: formData.contents || '',
-    };
+      const newChallenge = {
+        id: Date.now(), // 임시 ID
+        title: formData.title,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        targetAmount: parseInt(formData.targetAmount),
+        reward: parseInt(formData.reward) || 0,
+        contents: formData.contents || '',
+      };
 
-    setAllChallenges((prev) => [...prev, newChallenge]);
-    toast.success('챌린지가 성공적으로 생성되었습니다!');
-    handleCloseModal(); // 성공 시에만 모달 닫기
-  };
+      setAllChallenges((prev) => [...prev, newChallenge]);
+      toast.success('챌린지가 성공적으로 생성되었습니다!');
+      handleCloseModal(); // 성공 시에만 모달 닫기
+    },
+    [formData, validateForm, handleCloseModal],
+  );
 
   return (
     <>
@@ -828,6 +834,20 @@ function ChallengePage() {
           </div>
         </div>
       )}
+
+      {/* ToastContainer - 토스트 메시지가 여기서 나타남 */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </>
   );
 }
