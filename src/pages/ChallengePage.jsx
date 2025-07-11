@@ -24,20 +24,23 @@ function ChallengePage() {
   });
 
   // Mock 소비 데이터 (백엔드 MOONEY_EXPENSE 테이블에서 가져올 데이터)
-  const mockExpenseData = [
-    { date: '2025-01-01', amount: 50000 },
-    { date: '2025-01-02', amount: 30000 },
-    { date: '2025-01-03', amount: 20000 },
-    { date: '2025-01-04', amount: 45000 },
-    { date: '2025-01-05', amount: 25000 },
-    { date: '2025-01-06', amount: 35000 },
-    { date: '2025-01-07', amount: 40000 },
-    { date: '2025-01-08', amount: 55000 },
-    { date: '2025-01-09', amount: 30000 },
-    { date: '2025-01-10', amount: 70000 },
-    { date: '2024-11-13', amount: 111111 },
-    { date: '2024-12-12', amount: 500001 },
-  ];
+  const mockExpenseData = useMemo(
+    () => [
+      { date: '2025-01-01', amount: 50000 },
+      { date: '2025-01-02', amount: 30000 },
+      { date: '2025-01-03', amount: 20000 },
+      { date: '2025-01-04', amount: 45000 },
+      { date: '2025-01-05', amount: 25000 },
+      { date: '2025-01-06', amount: 35000 },
+      { date: '2025-01-07', amount: 40000 },
+      { date: '2025-01-08', amount: 55000 },
+      { date: '2025-01-09', amount: 30000 },
+      { date: '2025-01-10', amount: 70000 },
+      { date: '2024-11-13', amount: 111111 },
+      { date: '2024-12-12', amount: 500001 },
+    ],
+    [],
+  );
 
   // 모든 챌린지 데이터 (실제로는 API에서 가져올 데이터)
   const [allChallenges, setAllChallenges] = useState([
