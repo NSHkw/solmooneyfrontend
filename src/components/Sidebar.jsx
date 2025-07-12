@@ -35,7 +35,7 @@ const Sidebar = ({
     { id: 'allExpense', label: '전체수입지출', icon: wonImg, path: ROUTES.ACCOUNT_BOOK },
     { id: 'challenge', label: '챌린지', icon: chaImg, path: ROUTES.CHALLENGE },
     { id: 'diary', label: '다이어리', icon: diaryIcon, path: ROUTES.DIARY },
-    { id: 'accountBook', label: '가계부 적기', icon: pencilImg, path: ROUTES.ACCOUNT_BOOK },
+    { id: 'subscription', label: '구독', icon: pencilImg, path: ROUTES.SUBSCRIPTION },
   ];
 
   const handleMenuClick = (path, itemId) => {
