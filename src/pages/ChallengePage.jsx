@@ -24,7 +24,7 @@ function ChallengePage() {
     contents: '',
   });
 
-  // Mock 소비 데이터 (백엔드 MOONEY_EXPENSE 테이블에서 가져올 데이터)
+  // Mock 소비 데이터 (날짜 & 소비금액) (백엔드 가계부 테이블에서 가져올 데이터)
   const mockExpenseData = useMemo(
     () => [
       { date: '2025-01-01', amount: 50000 },
@@ -43,8 +43,9 @@ function ChallengePage() {
     [],
   );
 
-  // 모든 챌린지 데이터 (실제로는 API에서 가져올 데이터)
-  const [allChallenges, setAllChallenges] = useState([
+  // 모든 챌린지 데이터 (실제로는 API 통해 가져올 데이터)
+  // reward를 유저가 직접 선택하는 것은 문제가 될 수 있지 않을까 란 생각은 하고 있음
+  const [mockAllChallenges, setMockAllChallenges] = useState([
     {
       id: 1,
       title: '1월 절약 챌린지',
@@ -93,6 +94,7 @@ function ChallengePage() {
   ]);
 
   // startDate부터 현재(또는 endDate)까지의 지출 합계 계산 (실시간 변경이 가능하게)
+  // ! 목데이터 사용 중, 백엔드에서 가계부 데이터 전부 가져와야함
   const calculateCurrentAmount = useCallback(
     (startDate, endDate = null) => {
       const today = new Date();
@@ -108,7 +110,6 @@ function ChallengePage() {
       // 계산 기준일 결정 (챌린지가 끝났으면 endDate까지, 진행중이면 오늘까지)
       const calculationEndDate = challengeEndDate < today ? challengeEndDate : today;
 
-      // 목데이터 사용 중, 백엔드에서 가계부 데이터 전부 가져와야함
       return mockExpenseData
         .filter((expense) => {
           const expenseDate = new Date(expense.date);
@@ -145,8 +146,9 @@ function ChallengePage() {
   }, []);
 
   // 모든 챌린지에 currentAmount와 status 추가
+  // ! 목데이터 사용 중, 백엔드에서 가계부 데이터 전부 가져와야함
   const challengesWithStatus = useMemo(() => {
-    return allChallenges.map((challenge) => {
+    return mockAllChallenges.map((challenge) => {
       const currentAmount = calculateCurrentAmount(challenge.startDate, challenge.endDate);
       const status = calculateChallengeStatus(challenge, currentAmount);
       const gaugeBar =
@@ -161,7 +163,7 @@ function ChallengePage() {
         gaugeBar,
       };
     });
-  }, [allChallenges, calculateCurrentAmount, calculateChallengeStatus]);
+  }, [mockAllChallenges, calculateCurrentAmount, calculateChallengeStatus]);
 
   // 상태별로 챌린지 분류
   const { currentChallenge, previousChallenges, pendingChallenges } = useMemo(() => {
@@ -256,7 +258,7 @@ function ChallengePage() {
 
   // 폼 validation 함수
   const validateForm = useCallback((formData) => {
-    const { title, startDate, endDate, targetAmount } = formData;
+    const { title, startDate, endDate, targetAmount, reward } = formData;
 
     // 필수 필드 체크
     if (!title.trim()) {
@@ -279,14 +281,18 @@ function ChallengePage() {
       return false;
     }
 
-    // 날짜 validation
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (end <= start) {
-      toast.error('종료 날짜는 시작 날짜보다 늦어야 합니다.');
+    if (!(reward >= 10 && reward <= 200)) {
+      toast.error('보상 금액은 10포인트 이상 200포인트 이하여야 합니다.');
       return false;
     }
+    // // 날짜 validation
+    // const start = new Date(startDate);
+    // const end = new Date(endDate);
+
+    // if (end <= start) {
+    //   toast.error('종료 날짜는 시작 날짜보다 늦어야 합니다.');
+    //   return false;
+    // }
 
     return true;
   }, []);
@@ -311,7 +317,8 @@ function ChallengePage() {
         contents: formData.contents || '',
       };
 
-      setAllChallenges((prev) => [...prev, newChallenge]);
+      // ! 목데이터 사용 중, 백엔드에서 가계부 데이터 수정하는 방식
+      setMockAllChallenges((prev) => [...prev, newChallenge]);
       toast.success('챌린지가 성공적으로 생성되었습니다!');
       handleCloseModal(); // 성공 시에만 모달 닫기
     },
