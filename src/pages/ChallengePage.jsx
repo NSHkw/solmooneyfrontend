@@ -1,7 +1,6 @@
 // src/pages/ChallengePage.jsx
 import { useState, useMemo, useCallback } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { showError, showSuccess } from '@utils/toast';
 import S from '@styles/challengePage.style';
 
 const challengeStatus = {
@@ -269,27 +268,27 @@ function ChallengePage() {
     const { title, startDate, endDate, targetAmount, reward } = formData;
 
     if (!title.trim()) {
-      toast.error('챌린지 이름을 입력해주세요.');
+      showError('챌린지 이름을 입력해주세요.');
       return false;
     }
 
     if (!startDate) {
-      toast.error('시작 날짜를 선택해주세요.');
+      showError('시작 날짜를 선택해주세요.');
       return false;
     }
 
     if (!endDate) {
-      toast.error('종료 날짜를 선택해주세요.');
+      showError('종료 날짜를 선택해주세요.');
       return false;
     }
 
     if (!targetAmount || parseInt(targetAmount) <= 0) {
-      toast.error('목표 금액을 올바르게 입력해주세요.');
+      showError('목표 금액을 올바르게 입력해주세요.');
       return false;
     }
 
     if (reward && (reward < 10 || reward > 200)) {
-      toast.error('보상 포인트는 최소 10포인트, 최대 200포인트입니다.');
+      showError('보상 포인트는 최소 10포인트, 최대 200포인트입니다.');
       return false;
     }
 
@@ -315,7 +314,12 @@ function ChallengePage() {
       };
 
       setMockAllChallenges((prev) => [...prev, newChallenge]);
-      toast.success('챌린지가 성공적으로 생성되었습니다!');
+
+      // 성공 메시지 with 커스텀 옵션
+      showSuccess('🎉 챌린지가 성공적으로 생성되었습니다!', {
+        autoClose: 4000,
+      });
+
       handleCloseModal();
     },
     [formData, validateForm, handleCloseModal],
@@ -338,156 +342,151 @@ function ChallengePage() {
   }, []);
 
   return (
-    <>
-      <S.PageContainer>
-        {/* 왼쪽 */}
-        <S.LeftColumn>
-          {/* 현재 진행중인 챌린지 카드 */}
-          {currentChallenge ? (
-            <S.Card>
-              <S.SectionTitle>나의 챌린지</S.SectionTitle>
-              <S.ChallengeHeader>
-                <S.ChallengeTitle>{currentChallenge.title}</S.ChallengeTitle>
-                <S.ChallengeDateRange>
-                  {currentChallenge.startDate} ~ {currentChallenge.endDate}
-                </S.ChallengeDateRange>
-              </S.ChallengeHeader>
+    <S.PageContainer>
+      {/* 왼쪽 */}
+      <S.LeftColumn>
+        {/* 현재 진행중인 챌린지 카드 */}
+        {currentChallenge ? (
+          <S.Card>
+            <S.SectionTitle>나의 챌린지</S.SectionTitle>
+            <S.ChallengeHeader>
+              <S.ChallengeTitle>{currentChallenge.title}</S.ChallengeTitle>
+              <S.ChallengeDateRange>
+                {currentChallenge.startDate} ~ {currentChallenge.endDate}
+              </S.ChallengeDateRange>
+            </S.ChallengeHeader>
 
-              <S.TargetAmount>
-                목표 지출: {currentChallenge.targetAmount.toLocaleString()}원
-              </S.TargetAmount>
+            <S.TargetAmount>
+              목표 지출: {currentChallenge.targetAmount.toLocaleString()}원
+            </S.TargetAmount>
 
-              {/* 기간 진행률 게이지바 */}
-              <S.GaugeContainer marginBottom="20px">
-                <S.GaugeHeader>
-                  <S.GaugeLabel>기간 진행률</S.GaugeLabel>
-                  <S.GaugeValue>
-                    {currentChallenge.remainingDays > 0
-                      ? `${currentChallenge.remainingDays}일 남음`
-                      : '종료됨'}
-                  </S.GaugeValue>
-                </S.GaugeHeader>
-                <S.GaugeBar bgColor="#f0f0f0" height="8px">
-                  <S.GaugeFill fillColor="#9C27B0" width={currentChallenge.timeProgress} />
-                </S.GaugeBar>
-                <S.GaugeText>{Math.round(currentChallenge.timeProgress)}% 진행</S.GaugeText>
-              </S.GaugeContainer>
+            {/* 기간 진행률 게이지바 */}
+            <S.GaugeContainer marginBottom="20px">
+              <S.GaugeHeader>
+                <S.GaugeLabel>기간 진행률</S.GaugeLabel>
+                <S.GaugeValue>
+                  {currentChallenge.remainingDays > 0
+                    ? `${currentChallenge.remainingDays}일 남음`
+                    : '종료됨'}
+                </S.GaugeValue>
+              </S.GaugeHeader>
+              <S.GaugeBar bgColor="#f0f0f0" height="8px">
+                <S.GaugeFill fillColor="#9C27B0" width={currentChallenge.timeProgress} />
+              </S.GaugeBar>
+              <S.GaugeText>{Math.round(currentChallenge.timeProgress)}% 진행</S.GaugeText>
+            </S.GaugeContainer>
 
-              {/* 지출 진행률 게이지바 */}
-              <S.GaugeContainer>
-                <S.GaugeHeader>
-                  <S.GaugeLabel>지출 진행률</S.GaugeLabel>
-                  <S.GaugeValue>{Math.round(currentChallenge.gaugeBar)}%</S.GaugeValue>
-                </S.GaugeHeader>
-                <S.GaugeBar>
+            {/* 지출 진행률 게이지바 */}
+            <S.GaugeContainer>
+              <S.GaugeHeader>
+                <S.GaugeLabel>지출 진행률</S.GaugeLabel>
+                <S.GaugeValue>{Math.round(currentChallenge.gaugeBar)}%</S.GaugeValue>
+              </S.GaugeHeader>
+              <S.GaugeBar>
+                <S.GaugeFill
+                  fillColor={getStatusColor(currentChallenge.status)}
+                  width={currentChallenge.gaugeBar}
+                />
+              </S.GaugeBar>
+            </S.GaugeContainer>
+
+            <S.AmountDisplay>
+              현재 지출: {currentChallenge.currentAmount.toLocaleString()}원
+            </S.AmountDisplay>
+
+            <S.AmountDisplay
+              fontWeight="bold"
+              color={
+                currentChallenge.targetAmount - currentChallenge.currentAmount >= 0
+                  ? '#4CAF50'
+                  : '#ff4444'
+              }
+            >
+              목표까지 남은 지출:{' '}
+              {(currentChallenge.targetAmount - currentChallenge.currentAmount).toLocaleString()}원
+            </S.AmountDisplay>
+
+            {currentChallenge.status !== challengeStatus.ONGOING && (
+              <S.StatusBadge bgColor={getStatusColor(currentChallenge.status)}>
+                {currentChallenge.status}
+              </S.StatusBadge>
+            )}
+          </S.Card>
+        ) : (
+          <S.Card center>
+            <S.SectionTitle>나의 챌린지</S.SectionTitle>
+            <p>현재 진행중인 챌린지가 없습니다.</p>
+            <p>새로운 챌린지를 만들어보세요!</p>
+          </S.Card>
+        )}
+
+        {/* 이전 진행 챌린지 */}
+        <S.Card>
+          <S.SubSectionTitle>지금까지 진행한 챌린지</S.SubSectionTitle>
+          {previousChallenges.length > 0 ? (
+            previousChallenges.map((item) => (
+              <S.PreviousChallengeItem key={item.id}>
+                <S.PreviousChallengeHeader>
+                  <S.PreviousChallengeTitle>{item.title}</S.PreviousChallengeTitle>
+                  <S.StatusBadge bgColor={getStatusColor(item.status)}>{item.status}</S.StatusBadge>
+                </S.PreviousChallengeHeader>
+                <S.PreviousChallengeDateRange>
+                  {item.startDate} ~ {item.endDate}
+                </S.PreviousChallengeDateRange>
+                <S.GaugeBar height="6px">
                   <S.GaugeFill
-                    fillColor={getStatusColor(currentChallenge.status)}
-                    width={currentChallenge.gaugeBar}
+                    fillColor={getStatusColor(item.status)}
+                    width={Math.min(item.gaugeBar, 100)}
                   />
                 </S.GaugeBar>
-              </S.GaugeContainer>
-
-              <S.AmountDisplay>
-                현재 지출: {currentChallenge.currentAmount.toLocaleString()}원
-              </S.AmountDisplay>
-
-              <S.AmountDisplay
-                fontWeight="bold"
-                color={
-                  currentChallenge.targetAmount - currentChallenge.currentAmount >= 0
-                    ? '#4CAF50'
-                    : '#ff4444'
-                }
-              >
-                목표까지 남은 지출:{' '}
-                {(currentChallenge.targetAmount - currentChallenge.currentAmount).toLocaleString()}
-                원
-              </S.AmountDisplay>
-
-              {currentChallenge.status !== challengeStatus.ONGOING && (
-                <S.StatusBadge bgColor={getStatusColor(currentChallenge.status)}>
-                  {currentChallenge.status}
-                </S.StatusBadge>
-              )}
-            </S.Card>
+                <S.PreviousChallengeDetails>
+                  사용 금액: {item.currentAmount.toLocaleString()} /{' '}
+                  {item.targetAmount.toLocaleString()}원 ({Math.round(item.gaugeBar)}%)
+                </S.PreviousChallengeDetails>
+              </S.PreviousChallengeItem>
+            ))
           ) : (
-            <S.Card center>
-              <S.SectionTitle>나의 챌린지</S.SectionTitle>
-              <p>현재 진행중인 챌린지가 없습니다.</p>
-              <p>새로운 챌린지를 만들어보세요!</p>
-            </S.Card>
+            <S.EmptyState>완료된 챌린지가 없습니다.</S.EmptyState>
           )}
+        </S.Card>
+      </S.LeftColumn>
 
-          {/* 이전 진행 챌린지 */}
-          <S.Card>
-            <S.SubSectionTitle>지금까지 진행한 챌린지</S.SubSectionTitle>
-            {previousChallenges.length > 0 ? (
-              previousChallenges.map((item) => (
-                <S.PreviousChallengeItem key={item.id}>
-                  <S.PreviousChallengeHeader>
-                    <S.PreviousChallengeTitle>{item.title}</S.PreviousChallengeTitle>
-                    <S.StatusBadge bgColor={getStatusColor(item.status)}>
-                      {item.status}
-                    </S.StatusBadge>
-                  </S.PreviousChallengeHeader>
-                  <S.PreviousChallengeDateRange>
-                    {item.startDate} ~ {item.endDate}
-                  </S.PreviousChallengeDateRange>
-                  <S.GaugeBar height="6px">
-                    <S.GaugeFill
-                      fillColor={getStatusColor(item.status)}
-                      width={Math.min(item.gaugeBar, 100)}
-                    />
-                  </S.GaugeBar>
-                  <S.PreviousChallengeDetails>
-                    사용 금액: {item.currentAmount.toLocaleString()} /{' '}
-                    {item.targetAmount.toLocaleString()}원 ({Math.round(item.gaugeBar)}%)
-                  </S.PreviousChallengeDetails>
-                </S.PreviousChallengeItem>
-              ))
-            ) : (
-              <S.EmptyState>완료된 챌린지가 없습니다.</S.EmptyState>
-            )}
-          </S.Card>
-        </S.LeftColumn>
+      {/* 오른쪽 */}
+      <S.RightColumn>
+        <S.AddButton onClick={handleOpenModal}>+ Challenge 추가</S.AddButton>
 
-        {/* 오른쪽 */}
-        <S.RightColumn>
-          <S.AddButton onClick={handleOpenModal}>+ Challenge 추가</S.AddButton>
+        <S.SuccessRateCard>
+          <p style={{ margin: '0 0 10px 0' }}>챌린지 성공률</p>
+          <S.SuccessRateValue>{successRate}%</S.SuccessRateValue>
+        </S.SuccessRateCard>
 
-          <S.SuccessRateCard>
-            <p style={{ margin: '0 0 10px 0' }}>챌린지 성공률</p>
-            <S.SuccessRateValue>{successRate}%</S.SuccessRateValue>
-          </S.SuccessRateCard>
+        <S.PointsCard>
+          <S.PointsLabel>현재 보유중인 포인트</S.PointsLabel>
+          <S.PointsValue>1,250 P</S.PointsValue>
+        </S.PointsCard>
 
-          <S.PointsCard>
-            <S.PointsLabel>현재 보유중인 포인트</S.PointsLabel>
-            <S.PointsValue>1,250 P</S.PointsValue>
-          </S.PointsCard>
-
-          <S.Card>
-            <S.SubSectionTitle>시작 대기 중인 챌린지</S.SubSectionTitle>
-            {pendingChallenges.length > 0 ? (
-              pendingChallenges.map((challenge) => (
-                <S.PendingChallengeItem key={challenge.id}>
-                  <S.PendingChallengeHeader>
-                    <S.PendingChallengeTitle>{challenge.title}</S.PendingChallengeTitle>
-                    <S.StatusBadge bgColor="#FF9800">{challenge.status}</S.StatusBadge>
-                  </S.PendingChallengeHeader>
-                  <S.PendingChallengeInfo>
-                    {challenge.startDate} ~ {challenge.endDate}
-                  </S.PendingChallengeInfo>
-                  <S.PendingChallengeInfo>
-                    목표: {challenge.targetAmount.toLocaleString()}원
-                  </S.PendingChallengeInfo>
-                </S.PendingChallengeItem>
-              ))
-            ) : (
-              <S.EmptyState>대기 중인 챌린지가 없습니다.</S.EmptyState>
-            )}
-          </S.Card>
-        </S.RightColumn>
-      </S.PageContainer>
+        <S.Card>
+          <S.SubSectionTitle>시작 대기 중인 챌린지</S.SubSectionTitle>
+          {pendingChallenges.length > 0 ? (
+            pendingChallenges.map((challenge) => (
+              <S.PendingChallengeItem key={challenge.id}>
+                <S.PendingChallengeHeader>
+                  <S.PendingChallengeTitle>{challenge.title}</S.PendingChallengeTitle>
+                  <S.StatusBadge bgColor="#FF9800">{challenge.status}</S.StatusBadge>
+                </S.PendingChallengeHeader>
+                <S.PendingChallengeInfo>
+                  {challenge.startDate} ~ {challenge.endDate}
+                </S.PendingChallengeInfo>
+                <S.PendingChallengeInfo>
+                  목표: {challenge.targetAmount.toLocaleString()}원
+                </S.PendingChallengeInfo>
+              </S.PendingChallengeItem>
+            ))
+          ) : (
+            <S.EmptyState>대기 중인 챌린지가 없습니다.</S.EmptyState>
+          )}
+        </S.Card>
+      </S.RightColumn>
 
       {/* 모달창 */}
       {isModalOpen && (
@@ -581,21 +580,7 @@ function ChallengePage() {
           </S.ModalContent>
         </S.ModalOverlay>
       )}
-
-      {/* ToastContainer */}
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </>
+    </S.PageContainer>
   );
 }
 
