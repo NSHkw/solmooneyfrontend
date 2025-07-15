@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { toast } from 'react-toastify'; // ToastContainer 없이 toast만 import!
 import { useNavigate } from 'react-router-dom';
 
+// 로그인 페이지 안에 로그인 폼, 회원가입 폼, 아이디/비번 찾기 폼 3개를 구현하는 걸로 (페이지 위에 폼 3개)- 폼만 따로 구현하기
+// 로그인 폼, 로그인 API, api 받은 후 얻은 JWT 토큰 관리, 리액트에서는 로컬 스토리지 or 세션 스토리지에 저장 (이후 API 요청 시 헤더에 토큰 포함 시켜 요청 실시), 이후 로그인 성공한 뒤 리디렉션, 로그인 상태 관리는 컨텍스트나 redux 사용, 로그인 상태 유지(JWT 만료시 로그인 다시)
+
 function LoginPage() {
   const [loginData, setLoginData] = useState({
     id: '',
