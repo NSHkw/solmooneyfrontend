@@ -2,6 +2,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@route/routes.js';
 import { useState } from 'react';
+import { useAuth } from '@contexts/AuthContext'; // 인증 훅 추가
 import NotificationPanel from '@components/NotificationPanel';
 import mainImg from '@img/main.png';
 import diaryIcon from '@img/book.png';
@@ -11,7 +12,6 @@ import onBellImg from '@img/on_bell.png';
 import pencilImg from '@img/pencil.png';
 import chaImg from '@img/challenge.png';
 import mypageImg from '@img/mypage.png';
-import loginIcon from '@img/login.png';
 import logoutIcon from '@img/logout.png';
 
 const Sidebar = ({
@@ -23,8 +23,7 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const [isLogin, setIsLogin] = useState(false);
+  const { user, logout, checkTokenExpiry } = useAuth(); // 인증 상태 가져오기
 
   const [hasNotification, setHasNotification] = useState(true);
 
@@ -39,6 +38,11 @@ const Sidebar = ({
   ];
 
   const handleMenuClick = (path, itemId) => {
+    // 메뉴 클릭 시 토큰 체크
+    if (!checkTokenExpiry()) {
+      return; // 토큰이 만료되면 ProtectedRoute에서 자동 처리
+    }
+
     if (itemId === 'notify') {
       onOpenNotification();
     } else if (path) {
@@ -47,15 +51,22 @@ const Sidebar = ({
   };
 
   const handleRootClick = () => {
-    navigate(ROUTES.ROOT);
+    if (checkTokenExpiry()) {
+      navigate(ROUTES.ROOT);
+    }
   };
 
   const handleUserClick = () => {
-    navigate(ROUTES.USER);
+    if (checkTokenExpiry()) {
+      navigate(ROUTES.USER);
+    }
   };
 
   const handleLogout = () => {
-    navigate(ROUTES.LOGIN);
+    if (window.confirm('정말 로그아웃하시겠습니까?')) {
+      logout();
+      navigate(ROUTES.LOGIN);
+    }
   };
 
   return (
@@ -96,14 +107,11 @@ const Sidebar = ({
           </div>
 
           <p style={{ margin: 0, fontSize: '14px', textAlign: 'center' }}>
-            {isLogin ? (
-              <>
-                Welcome,&nbsp;
-                <span style={{ color: '#6B69EE' }}>{userId}</span>님!
-              </>
-            ) : (
-              '로그인을 먼저 해주세요!'
-            )}
+            Welcome,&nbsp;
+            <span style={{ color: '#6B69EE' }}>
+              {user?.name || user?.nickname || user?.id || '사용자'}
+            </span>
+            님!
           </p>
 
           {/* 메뉴 리스트 */}
@@ -221,14 +229,14 @@ const Sidebar = ({
             }}
           >
             <img
-              src={isLogin ? logoutIcon : loginIcon}
-              alt={isLogin ? 'Logout' : 'Login'}
+              src={logoutIcon}
+              alt="Logout"
               style={{
                 width: '18px',
                 height: '18px',
               }}
             />
-            {isLogin ? 'Logout' : 'Login'}
+            Logout
           </div>
         </div>
       </div>
