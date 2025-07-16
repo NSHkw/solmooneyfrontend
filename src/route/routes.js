@@ -8,5 +8,5 @@ export const ROUTES = {
   SUBSCRIPTION: '/subscription',
   USER: '/user',
   MODIFY_USER: '/modifyuser',
-  WITHDRAWL: '/withdrawl',
+  WITHDRAWAL: '/withdrawal',
 };

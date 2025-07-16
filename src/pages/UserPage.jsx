@@ -66,7 +66,7 @@ function UserPage() {
   const goToExit = () => {
     if (confirm('정말 회원 탈퇴 페이지로 이동하시겠습니까?')) {
       // 기존 alert 대신 실제 페이지 이동
-      navigate(ROUTES.WITHDRAWL);
+      navigate(ROUTES.WITHDRAWAL);
     }
   };
 
