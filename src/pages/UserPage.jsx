@@ -1,7 +1,10 @@
 // src/pages/UserPage.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@route/routes.js';
 
 function UserPage() {
+  const navigate = useNavigate();
   // 사용자 정보 상태 관리
   const [MemData, setMemData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,14 +60,13 @@ function UserPage() {
 
   // 페이지 이동 함수들 (실제 프로젝트에서는 useNavigate 사용)
   const goToEdit = () => {
-    alert('개인정보 수정 페이지로 이동합니다. (실제 환경에서는 /edit 페이지로 이동)');
-    // window.location.href = '/edit';
+    navigate(ROUTES.MODIFY_USER);
   };
 
   const goToExit = () => {
     if (confirm('정말 회원 탈퇴 페이지로 이동하시겠습니까?')) {
-      alert('회원 탈퇴 페이지로 이동합니다. (실제 환경에서는 /exit 페이지로 이동)');
-      // window.location.href = '/exit';
+      // 기존 alert 대신 실제 페이지 이동
+      navigate(ROUTES.WITHDRAWL);
     }
   };
 

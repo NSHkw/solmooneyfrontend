@@ -9,9 +9,9 @@ import ChallengePage from '@pages/ChallengePage.jsx';
 import AccountBookPage from '@pages/AccountBookPage.jsx';
 import UserPage from '@pages/UserPage.jsx';
 import SubscriptionPage from '@pages/SubscriptionPage.jsx';
-import Setting from '@pages/Setting.jsx';
-// import ExitPage from '@pages/ExitPage.jsx'; // 아직 구현되지 않음
 import { ROUTES } from '@route/routes.js';
+import WithdrawalPage from '@pages/WithdrawalPage.jsx';
+import ModifyUserPage from '@pages/ModifyUserPage.jsx';
 
 function AppRouter() {
   return (
@@ -28,26 +28,6 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path={ROUTES.SETTING}
-        element={
-          <ProtectedRoute>
-            <Setting />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* 회원 탈퇴 페이지 - 아직 구현되지 않음 */}
-      {/* 
-      <Route 
-        path="/exit" 
-        element={
-          <ProtectedRoute>
-            <ExitPage />
-          </ProtectedRoute>
-        } 
-      />
-      */}
 
       {/* Layout이 있는 페이지들 - 사이드바 있는 것 (모두 인증 필요) */}
       <Route
@@ -101,6 +81,24 @@ function AppRouter() {
             <Layout>
               <SubscriptionPage />
             </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.WITHDRAWAL}
+        element={
+          <ProtectedRoute>
+            <WithdrawalPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.MODIFY_USER}
+        element={
+          <ProtectedRoute>
+            <ModifyUserPage />
           </ProtectedRoute>
         }
       />
