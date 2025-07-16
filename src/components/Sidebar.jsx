@@ -28,8 +28,8 @@ const Sidebar = ({
   const [hasNotification, setHasNotification] = useState(true);
 
   const sidebarMenu = [
-    // 알림(모달), 전체지출, 챌린지, 다이어리, 가계부 적기
-    // !전체 지출과 가계부 적기 path를 동일하게 두었음 수정해야 함 (가계부 모달 창으로 바로 간다던지 그런 식으로)
+    // 알림(모달), 전체지출, 챌린지, 다이어리, 구독
+    //! 전체 지출과 가계부 적기 path를 동일하게 두었음 수정해야 함 (가계부 모달 창으로 바로 간다던지 그런 식으로)-구독으로 수정하긴 했는데, 필요한면 바꿀 것
     { id: 'notify', label: '알림', icon: hasNotification ? onBellImg : offBellImg },
     { id: 'allExpense', label: '전체수입지출', icon: wonImg, path: ROUTES.ACCOUNT_BOOK },
     { id: 'challenge', label: '챌린지', icon: chaImg, path: ROUTES.CHALLENGE },
@@ -241,7 +241,7 @@ const Sidebar = ({
         </div>
       </div>
 
-      {/* 알림창 - 기존 기능 유지 */}
+      {/* 알림창*/}
       {isNotificationPanelOpen && (
         <NotificationPanel onClose={onCloseNotification} notificationRef={notificationRef} />
       )}
