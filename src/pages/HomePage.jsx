@@ -1,8 +1,8 @@
 // src/pages/HomePage.jsx
-import { Apexcharts } from '@components/Apexcharts';
-import MyCalendar from '@components/MyCalendar';
-import CategoryChart from '@components/CategoryChart';
-import chatImg from '@img/chatbotmooney.png';
+import { Apexcharts } from '../components/Apexcharts';
+import MyCalendar from '../components/MyCalendar';
+import CategoryChart from '../components/CategoryChart';
+import chatImg from '../img/chatbotmooney.png';
 
 function HomePage() {
   return (

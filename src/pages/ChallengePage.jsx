@@ -1,7 +1,7 @@
 // src/pages/ChallengePage.jsx
 import { useState, useMemo, useCallback } from 'react';
-import { showError, showSuccess } from '@utils/toast';
-import S from '@styles/challengePage.style';
+import { showError, showSuccess } from '../utils/toast';
+import S from '../styles/challengePage.style';
 
 const challengeStatus = {
   SUCCESS: '성공',

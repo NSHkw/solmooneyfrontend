@@ -1,7 +1,8 @@
 // src/pages/UserPage.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@route/routes.js';
+import { ROUTES } from '../route/routes.js';
+import MOCKDATA from '../assets/mockData.js';
 
 function UserPage() {
   const navigate = useNavigate();
@@ -14,14 +15,7 @@ function UserPage() {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   // Mock 데이터
-  const mockUserData = {
-    id: 'testuser123',
-    nick: '가계부마스터',
-    pphoto: null, // 프로필 사진이 없는 경우
-    regd: '2024-01-15T00:00:00Z',
-    bir: '1995-06-20T00:00:00Z',
-    ppnt: 15750, // 포인트
-  };
+  const userData = MOCKDATA.mockUserData;
 
   // Mock 사용자 정보 가져오기 (서버 연결 대신)
   const getUserinfoDTA = async () => {
@@ -40,7 +34,7 @@ function UserPage() {
       }
 
       // Mock 데이터 설정
-      setMemData(mockUserData);
+      setMemData(userData);
     } catch (err) {
       setError(err.message);
     } finally {

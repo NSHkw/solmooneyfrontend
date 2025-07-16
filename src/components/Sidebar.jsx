@@ -1,18 +1,18 @@
 // src/components/Sidebar.jsx
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ROUTES } from '@route/routes.js';
+import { ROUTES } from '../route/routes.js';
 import { useState } from 'react';
-import { useAuth } from '@contexts/AuthContext'; // 인증 훅 추가
-import NotificationPanel from '@components/NotificationPanel';
-import mainImg from '@img/main.png';
-import diaryIcon from '@img/book.png';
-import wonImg from '@img/won.png';
-import offBellImg from '@img/off_bell.png';
-import onBellImg from '@img/on_bell.png';
-import pencilImg from '@img/pencil.png';
-import chaImg from '@img/challenge.png';
-import mypageImg from '@img/mypage.png';
-import logoutIcon from '@img/logout.png';
+import { useAuth } from '../contexts/AuthContext'; // 인증 훅 추가
+import NotificationPanel from '../components/NotificationPanel';
+import mainImg from '../img/main.png';
+import diaryIcon from '../img/book.png';
+import wonImg from '../img/won.png';
+import offBellImg from '../img/off_bell.png';
+import onBellImg from '../img/on_bell.png';
+import pencilImg from '../img/pencil.png';
+import chaImg from '../img/challenge.png';
+import mypageImg from '../img/mypage.png';
+import logoutIcon from '../img/logout.png';
 
 const Sidebar = ({
   isOpen,

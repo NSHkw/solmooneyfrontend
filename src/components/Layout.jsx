@@ -1,7 +1,7 @@
 // src/components/Layout.jsx
 import { useEffect, useRef, useState } from 'react';
-import Sidebar from '@components/Sidebar';
-import MenuIcon from '@img/Menu_Icon.png';
+import Sidebar from '../components/Sidebar';
+import MenuIcon from '../img/Menu_Icon.png';
 
 function Layout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

@@ -6,7 +6,6 @@ import {
   FaSortAlphaDown,
   FaClock,
   FaCheck,
-  FaTimes,
   FaEdit,
   FaTrash,
   FaCalendarCheck,
@@ -22,8 +21,9 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import { showSuccess, showError, showWarning, showInfo } from '@utils/toast';
-import S from '@styles/subscriptionPage.style';
+import { showSuccess, showError, showWarning, showInfo } from '../utils/toast';
+import S from '../styles/subscriptionPage.style';
+import MOCKDATA from '../assets/mockData.js';
 
 const alignStyle = {
   LATEST: 'latest',
@@ -44,137 +44,18 @@ function SubscriptionPage() {
 
   // Mock 카테고리 데이터
   // 카테고리 데이터 가져오기
-  const [categories] = useState([
-    { mcatId: 1, mcatName: '엔터테인먼트', mcatColor: '#FF6384' },
-    { mcatId: 2, mcatName: '업무/생산성', mcatColor: '#36A2EB' },
-    { mcatId: 3, mcatName: '클라우드 저장소', mcatColor: '#FFCE56' },
-    { mcatId: 4, mcatName: '쇼핑', mcatColor: '#8BC34A' },
-    { mcatId: 5, mcatName: '기타', mcatColor: '#9C27B0' },
-  ]);
+  const [categories] = useState(MOCKDATA.mockCategory);
 
   // Mock 수입/지출 테이블 데이터 (수정된 구조)
-  const [expenses, setExpenses] = useState([
-    // === 구독 예정 (PENDING) ===
-    {
-      mexpId: 1,
-      mexpMmemId: 'user001',
-      mexpDt: null, // 아직 지출 안함
-      mexpAmt: 17000,
-      mexpDec: 'Netflix 구독료',
-      mexpType: 'E',
-      mexpRpt: 'T', // 반복 지출
-      mexpRptdd: '2025-07-25', // 지출해야 할 날짜
-      mexpStatus: 'PENDING',
-      mcatId: 1,
-      categoryName: '엔터테인먼트',
-      categoryColor: '#FF6384',
-    },
-    {
-      mexpId: 2,
-      mexpMmemId: 'user001',
-      mexpDt: null,
-      mexpAmt: 10900,
-      mexpDec: 'Spotify Premium',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-07-28',
-      mexpStatus: 'PENDING',
-      mcatId: 1,
-      categoryName: '엔터테인먼트',
-      categoryColor: '#FF6384',
-    },
-    {
-      mexpId: 3,
-      mexpMmemId: 'user001',
-      mexpDt: null,
-      mexpAmt: 29000,
-      mexpDec: 'Adobe Creative Cloud',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-08-15', // 한달 넘음
-      mexpStatus: 'PENDING',
-      mcatId: 2,
-      categoryName: '업무/생산성',
-      categoryColor: '#36A2EB',
-    },
-    {
-      mexpId: 4,
-      mexpMmemId: 'user001',
-      mexpDt: null,
-      mexpAmt: 2900,
-      mexpDec: 'Google Drive 스토리지',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-08-01',
-      mexpStatus: 'PENDING',
-      mcatId: 3,
-      categoryName: '클라우드 저장소',
-      categoryColor: '#FFCE56',
-    },
-    {
-      mexpId: 5,
-      mexpMmemId: 'user001',
-      mexpDt: null,
-      mexpAmt: 4990,
-      mexpDec: '쿠팡 와우 멤버십',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-07-20', // 이미 지남 (OVERDUE 상태로 변경 예정)
-      mexpStatus: 'OVERDUE',
-      mcatId: 4,
-      categoryName: '쇼핑',
-      categoryColor: '#8BC34A',
-    },
+  const [expenses, setExpenses] = useState(
+    MOCKDATA.mockExpenseData.filter(() => {
+      // 구독 데이터를 가져오기 위해 가계부 데이터 중, mexpType='E', mexpRpt: 'T'인 데이터들만 필터링 (mexpDt와 mexpRptdd도 해야 하는데 어떻게 할 지 잘 모르겠다)
+      // 구독 리스트 추가될 때마다 데이터베이스에도 추가가 필요함(mexpDt와 mexpRptdd도 생각)
+      // 가계부 데이터에 mexpRptdd 말고도 구독 주기(cycle) 속성도 있다고 하는데 이것도 생각해야 할듯
+    }),
+  );
 
-    // === 구독 완료 (COMPLETED) ===
-    {
-      mexpId: 101,
-      mexpMmemId: 'user001',
-      mexpDt: '2025-07-12', // 실제 지출한 날짜
-      mexpAmt: 17000,
-      mexpDec: 'Netflix 구독료',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-06-25', // 원래 예정일
-      mexpStatus: 'COMPLETED',
-      mcatId: 1,
-      categoryName: '엔터테인먼트',
-      categoryColor: '#FF6384',
-    },
-    {
-      mexpId: 102,
-      mexpMmemId: 'user001',
-      mexpDt: '2025-07-10',
-      mexpAmt: 2900,
-      mexpDec: 'Google Drive 스토리지',
-      mexpType: 'E',
-      mexpRpt: 'T',
-      mexpRptdd: '2025-07-01',
-      mexpStatus: 'COMPLETED',
-      mcatId: 3,
-      categoryName: '클라우드 저장소',
-      categoryColor: '#FFCE56',
-    },
-
-    // === 일반 지출 (참고용) ===
-    {
-      mexpId: 201,
-      mexpMmemId: 'user001',
-      mexpDt: '2025-07-15',
-      mexpAmt: 50000,
-      mexpDec: '마트 장보기',
-      mexpType: 'E',
-      mexpRpt: 'F', // 일회성
-      mexpRptdd: null,
-      mexpStatus: 'COMPLETED',
-      mcatId: 5,
-      categoryName: '기타',
-      categoryColor: '#9C27B0',
-    },
-  ]);
-
-  // 현재 날짜 (2025-07-14)
-  const today = new Date('2025-07-14');
+  const today = new Date();
 
   // 지출해야 할 것 필터링 (MEXP_STATUS = 'PENDING' or 'OVERDUE', MEXP_RPT = 'T')
   const getPendingPayments = () => {

@@ -1,5 +1,5 @@
 // src/components/CategoryChart.jsx
-import '@css/chartbar.css';
+import '../css/chartbar.css';
 import {
   BarChart,
   Bar,
