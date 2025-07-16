@@ -51,7 +51,7 @@ const authReducer = (state, action) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, {
+  const [state, action] = useReducer(authReducer, {
     isAuthenticated: false,
     user: null,
     token: null,
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
         try {
           const response = await API.verifyToken(token);
           if (response.success) {
-            dispatch({
+            action({
               type: 'LOGIN_SUCCESS',
               payload: {
                 token,
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   // 로그인 함수
   const loginHandler = async (credentials) => {
-    dispatch({ type: 'LOGIN_START' });
+    action({ type: 'LOGIN_START' });
 
     try {
       const result = await API.login(credentials);
@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', result.data.token);
         localStorage.setItem('userData', JSON.stringify(result.data.user));
 
-        dispatch({
+        action({
           type: 'LOGIN_SUCCESS',
           payload: {
             token: result.data.token,
@@ -112,7 +112,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user: result.data.user };
       }
     } catch (error) {
-      dispatch({ type: 'LOGIN_FAILURE', payload: error.message });
+      action({ type: 'LOGIN_FAILURE', payload: error.message });
       toast.error(error.message);
       return { success: false, error: error.message };
     }
@@ -120,7 +120,7 @@ export const AuthProvider = ({ children }) => {
 
   // 회원가입 함수
   const registerHandler = async (userData) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
+    action({ type: 'SET_LOADING', payload: true });
 
     try {
       const result = await API.register(userData);
@@ -133,7 +133,7 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
       return { success: false, error: error.message };
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      action({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -166,7 +166,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: '로그인이 필요합니다.' };
     }
 
-    dispatch({ type: 'SET_LOADING', payload: true });
+    action({ type: 'SET_LOADING', payload: true });
 
     try {
       const result = await API.updateUserInfo(state.user.id, updateData);
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userData', JSON.stringify(result.data.user));
 
         // 상태 업데이트
-        dispatch({
+        action({
           type: 'UPDATE_USER',
           payload: result.data.user,
         });
@@ -188,7 +188,7 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
       return { success: false, error: error.message };
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      action({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -199,7 +199,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: '로그인이 필요합니다.' };
     }
 
-    dispatch({ type: 'SET_LOADING', payload: true });
+    action({ type: 'SET_LOADING', payload: true });
 
     try {
       const result = await API.deleteAccount(state.user.id, passwordData);
@@ -210,7 +210,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('userData');
 
         // 상태 초기화
-        dispatch({ type: 'LOGOUT' });
+        action({ type: 'LOGOUT' });
 
         toast.success(result.message);
         return { success: true };
@@ -219,7 +219,7 @@ export const AuthProvider = ({ children }) => {
       toast.error(error.message);
       return { success: false, error: error.message };
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+      action({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -237,7 +237,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('userData', JSON.stringify(result.data.user));
 
         // 상태 업데이트
-        dispatch({
+        action({
           type: 'UPDATE_USER',
           payload: result.data.user,
         });
@@ -257,7 +257,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userData');
 
     // 상태 초기화
-    dispatch({ type: 'LOGOUT' });
+    action({ type: 'LOGOUT' });
 
     // 사용자에게 알림
     toast.info('로그아웃되었습니다.');
@@ -269,7 +269,7 @@ export const AuthProvider = ({ children }) => {
 
     if (!token) {
       if (state.isAuthenticated) {
-        dispatch({ type: 'LOGOUT' });
+        action({ type: 'LOGOUT' });
       }
       return false;
     }
@@ -292,7 +292,7 @@ export const AuthProvider = ({ children }) => {
 
   // 에러 클리어
   const clearError = () => {
-    dispatch({ type: 'CLEAR_ERROR' });
+    action({ type: 'CLEAR_ERROR' });
   };
 
   const contextValue = {
