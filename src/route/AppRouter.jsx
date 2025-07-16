@@ -1,17 +1,17 @@
 // src/route/AppRouter.jsx
 import { Routes, Route } from 'react-router-dom';
-import Layout from '@components/Layout.jsx';
-import ProtectedRoute from '@components/ProtectedRoute';
-import HomePage from '@pages/HomePage.jsx';
-import LoginPage from '@pages/LoginPage.jsx';
-import DiaryPage from '@pages/DiaryPage.jsx';
-import ChallengePage from '@pages/ChallengePage.jsx';
-import AccountBookPage from '@pages/AccountBookPage.jsx';
-import UserPage from '@pages/UserPage.jsx';
-import SubscriptionPage from '@pages/SubscriptionPage.jsx';
-import { ROUTES } from '@route/routes.js';
-import WithdrawalPage from '@pages/WithdrawalPage.jsx';
-import ModifyUserPage from '@pages/ModifyUserPage.jsx';
+import Layout from '../components/Layout.jsx';
+import ProtectedRoute from '../route/ProtectedRoute';
+import HomePage from '../pages/HomePage.jsx';
+import LoginPage from '../pages/LoginPage.jsx';
+import DiaryPage from '../pages/DiaryPage.jsx';
+import ChallengePage from '../pages/ChallengePage.jsx';
+import AccountBookPage from '../pages/AccountBookPage.jsx';
+import UserPage from '../pages/UserPage.jsx';
+import SubscriptionPage from '../pages/SubscriptionPage.jsx';
+import { ROUTES } from '../route/routes.js';
+import WithdrawalPage from '../pages/WithdrawalPage.jsx';
+import ModifyUserPage from '../pages/ModifyUserPage.jsx';
 
 function AppRouter() {
   return (

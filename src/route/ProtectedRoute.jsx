@@ -1,9 +1,9 @@
 // src/components/ProtectedRoute.jsx
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { ROUTES } from '@route/routes';
+import { ROUTES } from '../route/routes';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, checkTokenExpiry, loading } = useAuth();
