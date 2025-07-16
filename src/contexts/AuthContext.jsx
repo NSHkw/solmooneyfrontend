@@ -1,5 +1,5 @@
 // src/contexts/AuthContext.jsx
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import API from '../services/mock/mockUser.js';
 
@@ -321,10 +321,4 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth는 AuthProvider 내에서 사용되어야 합니다.');
-  }
-  return context;
-};
+export default AuthContext;
