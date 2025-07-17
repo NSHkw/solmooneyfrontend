@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../route/routes.js';
 import useAuth from '../contexts/useAuth.jsx';
+import S from '../styles/userPage.style.js';
 
 function UserPage() {
   const navigate = useNavigate();
-  const { user, refreshUserInfo, loading } = useAuth(); // AuthContext에서 현재 로그인된 사용자 정보 가져오기
+  const { user, refreshUserInfo, loading } = useAuth();
 
   // 상태 관리
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ function UserPage() {
     };
 
     fetchUserInfo();
-  }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
+  }, []);
 
   // 날짜 포맷팅 함수
   const formatDate = (str) => {
@@ -52,7 +53,7 @@ function UserPage() {
   };
 
   const goToHome = () => {
-    navigate(ROUTES.ROOT); // 실제 홈페이지로 이동
+    navigate(ROUTES.ROOT);
   };
 
   // 카테고리 모달 토글
@@ -102,46 +103,50 @@ function UserPage() {
   // 로딩 상태
   if (loading || isLoading) {
     return (
-      <div style={styles.container}>
-        <div style={styles.loading}>불러오는 중...</div>
-      </div>
+      <S.PageContainer>
+        <S.Container>
+          <S.Loading>불러오는 중...</S.Loading>
+        </S.Container>
+      </S.PageContainer>
     );
   }
 
   // 에러 상태
   if (error) {
     return (
-      <div style={styles.container}>
-        <div style={styles.error}>오류: {error}</div>
-      </div>
+      <S.PageContainer>
+        <S.Container>
+          <S.Error>오류: {error}</S.Error>
+        </S.Container>
+      </S.PageContainer>
     );
   }
 
   // 사용자 데이터가 없을 때
   if (!user) {
     return (
-      <div style={styles.container}>
-        <div style={styles.error}>로그인이 필요합니다.</div>
-      </div>
+      <S.PageContainer>
+        <S.Container>
+          <S.Error>로그인이 필요합니다.</S.Error>
+        </S.Container>
+      </S.PageContainer>
     );
   }
 
   return (
-    <div style={styles.pageContainer}>
+    <S.PageContainer>
       {/* 헤더 */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>마이페이지</h1>
-        <button onClick={goToHome} style={styles.homeButton}>
-          홈으로
-        </button>
-      </div>
+      <S.Header>
+        <S.Title>마이페이지</S.Title>
+        <S.HomeButton onClick={goToHome}>홈으로</S.HomeButton>
+      </S.Header>
 
       {/* 메인 컨텐츠 */}
-      <div style={styles.container}>
+      <S.Container>
         {/* 프로필 섹션 */}
-        <div style={styles.profileSection}>
-          <div style={styles.profileImageContainer}>
-            <img
+        <S.ProfileSection>
+          <S.ProfileImageContainer>
+            <S.ProfileImage
               src={
                 user.pphoto
                   ? user.pphoto.startsWith('data:')
@@ -150,424 +155,79 @@ function UserPage() {
                   : 'https://via.placeholder.com/100x100/ddd/666?text=USER'
               }
               alt="프로필"
-              style={styles.profileImage}
             />
-          </div>
-          <div style={styles.profileInfo}>
-            <h2 style={styles.nickname}>{user.nick} 님</h2>
-            <p style={styles.infoText}>아이디: {user.id}</p>
-            <p style={styles.infoText}>가입일: {formatDate(user.regd)}</p>
-            {user.bir && <p style={styles.infoText}>생년월일: {formatDate(user.bir)}</p>}
-          </div>
-        </div>
+          </S.ProfileImageContainer>
+          <S.ProfileInfo>
+            <S.Nickname>{user.nick} 님</S.Nickname>
+            <S.InfoText>아이디: {user.id}</S.InfoText>
+            <S.InfoText>가입일: {formatDate(user.regd)}</S.InfoText>
+            {user.bir && <S.InfoText>생년월일: {formatDate(user.bir)}</S.InfoText>}
+          </S.ProfileInfo>
+        </S.ProfileSection>
 
         {/* 포인트 섹션 */}
-        <div style={styles.pointSection}>
-          <div style={styles.pointCard}>
-            <div style={styles.pointIcon}>💰</div>
-            <div style={styles.pointInfo}>
-              <p style={styles.pointLabel}>보유 포인트</p>
-              <p style={styles.pointValue}>{user.ppnt?.toLocaleString() ?? 0} P</p>
-            </div>
-            <button onClick={usePoints} style={styles.usePointButton}>
-              포인트 사용
-            </button>
-          </div>
-        </div>
+        <S.PointSection>
+          <S.PointCard>
+            <S.PointIcon>💰</S.PointIcon>
+            <S.PointInfo>
+              <S.PointLabel>보유 포인트</S.PointLabel>
+              <S.PointValue>{user.ppnt?.toLocaleString() ?? 0} P</S.PointValue>
+            </S.PointInfo>
+            <S.UsePointButton onClick={usePoints}>포인트 사용</S.UsePointButton>
+          </S.PointCard>
+        </S.PointSection>
 
         {/* 카테고리 관리 섹션 */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>카테고리 관리</h3>
-          <button onClick={toggleCategoryModal} style={styles.categoryButton}>
-            카테고리 추가
-          </button>
-        </div>
+        <S.Section>
+          <S.SectionTitle>카테고리 관리</S.SectionTitle>
+          <S.CategoryButton onClick={toggleCategoryModal}>카테고리 추가</S.CategoryButton>
+        </S.Section>
 
         {/* 계정 관리 섹션 */}
-        <div style={styles.section}>
-          <h3 style={styles.sectionTitle}>계정 관리</h3>
-          <div style={styles.actionButtons}>
-            <button onClick={goToEdit} style={styles.editButton}>
-              개인정보 수정
-            </button>
-            <button onClick={goToExit} style={styles.exitButton}>
-              회원 탈퇴
-            </button>
-          </div>
-        </div>
-      </div>
+        <S.Section>
+          <S.SectionTitle>계정 관리</S.SectionTitle>
+          <S.ActionButtons>
+            <S.EditButton onClick={goToEdit}>개인정보 수정</S.EditButton>
+            <S.ExitButton onClick={goToExit}>회원 탈퇴</S.ExitButton>
+          </S.ActionButtons>
+        </S.Section>
+      </S.Container>
 
       {/* 카테고리 추가 모달 */}
       {showCategoryModal && (
-        <div style={styles.modalOverlay} onClick={toggleCategoryModal}>
-          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.modalHeader}>
-              <h3 style={styles.modalTitle}>카테고리 추가</h3>
-              <button onClick={toggleCategoryModal} style={styles.closeButton}>
-                ×
-              </button>
-            </div>
-            <div style={styles.modalContent}>
-              <div style={styles.categoryForm}>
-                <p style={styles.modalDescription}>새로운 지출/수입 카테고리를 추가하세요.</p>
-                <div style={styles.categoryExamples}>
-                  <h4 style={styles.exampleTitle}>카테고리 예시:</h4>
-                  <div style={styles.exampleTags}>
-                    <span style={styles.exampleTag}>🍽️ 식비</span>
-                    <span style={styles.exampleTag}>🚗 교통비</span>
-                    <span style={styles.exampleTag}>🎮 취미</span>
-                    <span style={styles.exampleTag}>💼 부업수입</span>
-                    <span style={styles.exampleTag}>🏠 월세</span>
-                    <span style={styles.exampleTag}>📱 통신비</span>
-                  </div>
-                </div>
-                <div style={styles.modalButtons}>
-                  <button onClick={handleAddCategory} style={styles.modalConfirmButton}>
+        <S.ModalOverlay onClick={toggleCategoryModal}>
+          <S.Modal onClick={(e) => e.stopPropagation()}>
+            <S.ModalHeader>
+              <S.ModalTitle>카테고리 추가</S.ModalTitle>
+              <S.CloseButton onClick={toggleCategoryModal}>×</S.CloseButton>
+            </S.ModalHeader>
+            <S.ModalContent>
+              <S.CategoryForm>
+                <S.ModalDescription>새로운 지출/수입 카테고리를 추가하세요.</S.ModalDescription>
+                <S.CategoryExamples>
+                  <S.ExampleTitle>카테고리 예시:</S.ExampleTitle>
+                  <S.ExampleTags>
+                    <S.ExampleTag>🍽️ 식비</S.ExampleTag>
+                    <S.ExampleTag>🚗 교통비</S.ExampleTag>
+                    <S.ExampleTag>🎮 취미</S.ExampleTag>
+                    <S.ExampleTag>💼 부업수입</S.ExampleTag>
+                    <S.ExampleTag>🏠 월세</S.ExampleTag>
+                    <S.ExampleTag>📱 통신비</S.ExampleTag>
+                  </S.ExampleTags>
+                </S.CategoryExamples>
+                <S.ModalButtons>
+                  <S.ModalConfirmButton onClick={handleAddCategory}>
                     카테고리 추가
-                  </button>
-                  <button onClick={toggleCategoryModal} style={styles.modalCancelButton}>
-                    취소
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+                  </S.ModalConfirmButton>
+                  <S.ModalCancelButton onClick={toggleCategoryModal}>취소</S.ModalCancelButton>
+                </S.ModalButtons>
+              </S.CategoryForm>
+            </S.ModalContent>
+          </S.Modal>
+        </S.ModalOverlay>
       )}
-    </div>
+    </S.PageContainer>
   );
 }
-
-// 스타일 정의 (기존과 동일)
-const styles = {
-  pageContainer: {
-    minHeight: '100vh',
-    backgroundColor: '#f5f5f5',
-    padding: '20px',
-  },
-
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxWidth: '600px',
-    margin: '0 auto 30px auto',
-  },
-
-  title: {
-    fontSize: '28px',
-    fontWeight: 'bold',
-    color: '#333',
-    margin: 0,
-  },
-
-  homeButton: {
-    padding: '10px 20px',
-    backgroundColor: '#4A90E2',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-
-  container: {
-    maxWidth: '600px',
-    margin: '0 auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '24px',
-  },
-
-  // 프로필 섹션
-  profileSection: {
-    backgroundColor: 'white',
-    padding: '30px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    textAlign: 'center',
-  },
-
-  profileImageContainer: {
-    marginBottom: '20px',
-  },
-
-  profileImage: {
-    width: '100px',
-    height: '100px',
-    borderRadius: '50%',
-    objectFit: 'cover',
-    border: '3px solid #e0e0e0',
-  },
-
-  profileInfo: {
-    width: '100%',
-  },
-
-  nickname: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '16px',
-  },
-
-  infoText: {
-    fontSize: '16px',
-    color: '#666',
-    margin: '8px 0',
-  },
-
-  // 포인트 섹션
-  pointSection: {
-    backgroundColor: 'white',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  },
-
-  pointCard: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-  },
-
-  pointIcon: {
-    fontSize: '32px',
-  },
-
-  pointInfo: {
-    flex: 1,
-  },
-
-  pointLabel: {
-    fontSize: '14px',
-    color: '#666',
-    margin: '0 0 8px 0',
-  },
-
-  pointValue: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#4A90E2',
-    margin: 0,
-  },
-
-  usePointButton: {
-    padding: '8px 16px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    fontWeight: '500',
-  },
-
-  // 일반 섹션
-  section: {
-    backgroundColor: 'white',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-  },
-
-  sectionTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '16px',
-  },
-
-  // 카테고리 버튼
-  categoryButton: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: '#28a745',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-  },
-
-  // 액션 버튼들
-  actionButtons: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-  },
-
-  editButton: {
-    width: '100%',
-    padding: '14px',
-    backgroundColor: '#4A90E2',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-  },
-
-  exitButton: {
-    width: '100%',
-    padding: '14px',
-    backgroundColor: '#dc3545',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'pointer',
-  },
-
-  // 로딩 및 에러
-  loading: {
-    textAlign: 'center',
-    padding: '40px',
-    fontSize: '18px',
-    color: '#666',
-  },
-
-  error: {
-    textAlign: 'center',
-    padding: '40px',
-    fontSize: '16px',
-    color: '#dc3545',
-    backgroundColor: '#f8f9fa',
-    borderRadius: '8px',
-    border: '1px solid #e0e0e0',
-  },
-
-  // 모달 스타일
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-
-  modal: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '0',
-    maxWidth: '400px',
-    width: '90%',
-    maxHeight: '80%',
-    overflow: 'hidden',
-    boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-  },
-
-  modalHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '20px 24px',
-    borderBottom: '1px solid #e0e0e0',
-  },
-
-  modalTitle: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#333',
-    margin: 0,
-  },
-
-  closeButton: {
-    background: 'none',
-    border: 'none',
-    fontSize: '24px',
-    cursor: 'pointer',
-    color: '#666',
-    padding: '0',
-    width: '30px',
-    height: '30px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  modalContent: {
-    padding: '24px',
-  },
-
-  categoryForm: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-  },
-
-  modalDescription: {
-    margin: 0,
-    fontSize: '16px',
-    color: '#666',
-    textAlign: 'center',
-  },
-
-  categoryExamples: {
-    textAlign: 'center',
-  },
-
-  exampleTitle: {
-    fontSize: '14px',
-    color: '#333',
-    margin: '0 0 12px 0',
-  },
-
-  exampleTags: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    justifyContent: 'center',
-  },
-
-  exampleTag: {
-    padding: '6px 12px',
-    backgroundColor: '#f8f9fa',
-    border: '1px solid #e9ecef',
-    borderRadius: '16px',
-    fontSize: '12px',
-    color: '#495057',
-  },
-
-  modalButtons: {
-    display: 'flex',
-    gap: '12px',
-    justifyContent: 'center',
-  },
-
-  modalConfirmButton: {
-    padding: '10px 20px',
-    backgroundColor: '#4A90E2',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-
-  modalCancelButton: {
-    padding: '10px 20px',
-    backgroundColor: '#6c757d',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-  },
-};
 
 export default UserPage;
