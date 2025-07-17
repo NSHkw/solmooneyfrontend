@@ -292,6 +292,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // 현재 사용자 비밀번호 확인
+  const verifyPasswordHandler = async (password) => {
+    if (!state.user) {
+      toast.error('로그인이 필요합니다.');
+      return { success: false, error: '로그인이 필요합니다.' };
+    }
+
+    try {
+      const result = await USER_API.verifyPassword(state.user.id, password);
+      return result;
+    } catch (error) {
+      toast.error(error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
   // 에러 클리어
   const clearError = () => {
     action({ type: 'CLEAR_ERROR' });
@@ -315,6 +331,7 @@ export const AuthProvider = ({ children }) => {
     updateUserInfo: updateUserInfoHandler,
     deleteAccount: deleteAccountHandler,
     refreshUserInfo,
+    verifyPassword: verifyPasswordHandler,
 
     // 유틸리티 함수들
     clearError,

@@ -294,6 +294,28 @@ const logout = async () => {
   };
 };
 
+// 현재 로그인한 사용자의 비밀번호 확인
+const verifyPassword = async (userId, password) => {
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  // 사용자 찾기
+  const user = MOCKDATA.mockUserData.find((u) => u.id === userId);
+
+  if (!user) {
+    throw new Error('사용자를 찾을 수 없음');
+  }
+
+  // 비밀번호 확인
+  if (user.pw !== password) {
+    throw new Error('비밀번호가 올바르지 않습니다');
+  }
+
+  return {
+    success: true,
+    message: '비밀번호 확인 완료',
+  };
+};
+
 const USER_API = {
   // 로그인 관련 mock api
   login,
@@ -307,6 +329,7 @@ const USER_API = {
   deleteAccount,
   getUserInfo,
   logout,
+  verifyPassword,
 };
 
 export default USER_API;
