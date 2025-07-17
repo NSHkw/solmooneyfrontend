@@ -14,7 +14,7 @@ const login = async (credentials) => {
   const user = MOCKDATA.mockUserData.find((u) => u.id === id && u.pw === password);
 
   if (!user) {
-    console.log('=-=-=-=-=-로그인 에러');
+    console.log('로그인 에러가 났다');
     throw new Error('아이디 or 비번 틀림');
   }
 
@@ -130,7 +130,7 @@ const sendVerificationEmail = async (email) => {
 
   // 이메일 형식 검증
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.MOCKDATA(email)) {
+  if (!emailRegex.test(email)) {
     throw new Error('올바른 이메일 형식이 아닙니다.');
   }
 
@@ -163,7 +163,7 @@ const sendVerificationEmail = async (email) => {
   };
 };
 
-// 이메일 인증코드 확인 API
+// 이메일 인증코드 확인 USER_API
 const verifyEmailCode = async (email, code) => {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -294,7 +294,7 @@ const logout = async () => {
   };
 };
 
-const API = {
+const USER_API = {
   // 로그인 관련 mock api
   login,
   register,
@@ -309,4 +309,4 @@ const API = {
   logout,
 };
 
-export default API;
+export default USER_API;

@@ -59,7 +59,7 @@ const mockUserData = [
   {
     id: 'user001',
     pw: 'user001',
-    nick: 'user001',
+    nick: 'user000000',
     pphoto: 'null',
     regd: '2025-07-08',
     bir: '2020-05-05',
@@ -68,7 +68,7 @@ const mockUserData = [
   {
     id: 'user002',
     pw: 'user002',
-    nick: 'user002',
+    nick: 'user023456',
     pphoto: 'null',
     regd: '2025-07-09',
     bir: '2020-05-09',

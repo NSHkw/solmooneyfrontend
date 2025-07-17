@@ -2,7 +2,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../route/routes.js';
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext'; // 인증 훅 추가
+import useAuth from '../contexts/useAuth.jsx';
 import NotificationPanel from '../components/NotificationPanel';
 import mainImg from '../img/main.png';
 import diaryIcon from '../img/book.png';
