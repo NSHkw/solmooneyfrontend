@@ -224,8 +224,63 @@ const checkNicknameDuplicate = async (nickname) => {
 };
 
 // 회원정보 수정
-const updateUserInfo = async () => {
+const updateUserInfo = async (userId, updateData) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  // 사용자 찾기
+  const userIndex = MOCKDATA.mockUserData.findIndex((u) => u.id === userId);
+
+  if (userIndex === -1) {
+    throw new Error('사용자를 찾을 수 없음');
+  }
+
+  const user = MOCKDATA.mockUserData[userIndex];
+
+  // 닉네임 중복 확인 (현재 사용자 제외)
+  if (updateData.nickname && updateData.nickname !== user.nick) {
+    const nicknameExists = MOCKDATA.mockUserData.some(
+      (u) => u.nick === updateData.nickname && u.id !== userId,
+    );
+
+    if (nicknameExists) {
+      throw new Error('이미 사용중인 닉네임입니다');
+    }
+  }
+
+  // 사용자 정보 업데이트
+  const updatedUser = { ...user };
+
+  if (updateData.nickname) {
+    updatedUser.nick = updateData.nickname;
+  }
+
+  if (updateData.password) {
+    updatedUser.pw = updateData.password;
+  }
+
+  if (updateData.profilePhoto !== undefined) {
+    updatedUser.pphoto = updateData.profilePhoto;
+  }
+
+  // Mock 데이터 업데이트
+  MOCKDATA.mockUserData[userIndex] = updatedUser;
+
+  console.log(`회원정보 수정 완료: ${userId}`, updatedUser);
+
+  return {
+    success: true,
+    message: '회원정보가 성공적으로 수정되었습니다',
+    data: {
+      user: {
+        id: updatedUser.id,
+        nick: updatedUser.nick,
+        ppnt: updatedUser.ppnt,
+        regd: updatedUser.regd,
+        bir: updatedUser.bir,
+        pphoto: updatedUser.pphoto,
+      },
+    },
+  };
 };
 
 // 회원탈퇴

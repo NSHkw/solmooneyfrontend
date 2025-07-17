@@ -52,42 +52,36 @@ const authReducer = (state, action) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, action] = useReducer(authReducer, {
-    isAuthenticated: false,
-    user: null,
-    token: null,
-    loading: false,
-    error: null,
-  });
+  // 🔥 초기 상태에서 바로 localStorage 체크
+  const getInitialState = () => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('userData');
 
-  // 앱 시작 시 토큰 확인
-  useEffect(() => {
-    const initializeAuth = async () => {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('userData');
-
-      if (token && userData) {
-        try {
-          const response = await USER_API.verifyToken(token);
-          if (response.success) {
-            action({
-              type: 'LOGIN_SUCCESS',
-              payload: {
-                token,
-                user: JSON.parse(userData),
-              },
-            });
-          }
-        } catch (error) {
-          console.error('로그인 토큰 X ', error);
-          localStorage.removeItem('token');
-          localStorage.removeItem('userData');
-        }
+    if (token && userData) {
+      try {
+        return {
+          isAuthenticated: true,
+          user: JSON.parse(userData),
+          token: token,
+          loading: false,
+          error: null,
+        };
+      } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
       }
-    };
+    }
 
-    initializeAuth();
-  }, []);
+    return {
+      isAuthenticated: false,
+      user: null,
+      token: null,
+      loading: false,
+      error: null,
+    };
+  };
+
+  const [state, action] = useReducer(authReducer, getInitialState());
 
   // 로그인 함수
   const loginHandler = async (credentials) => {

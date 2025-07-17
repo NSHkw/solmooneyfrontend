@@ -2,49 +2,37 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../route/routes.js';
-import MOCKDATA from '../assets/mockData.js';
+import useAuth from '../contexts/useAuth.jsx';
 
 function UserPage() {
   const navigate = useNavigate();
-  // 사용자 정보 상태 관리
-  const [MemData, setMemData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, refreshUserInfo, loading } = useAuth(); // AuthContext에서 현재 로그인된 사용자 정보 가져오기
+
+  // 상태 관리
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // 카테고리 추가 모달 상태
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  // Mock 데이터
-  const userData = MOCKDATA.mockUserData;
-
-  // Mock 사용자 정보 가져오기 (서버 연결 대신)
-  const getUserinfoDTA = async () => {
-    try {
-      setIsLoading(true);
-
-      // 실제 서버 연결 시뮬레이션 (1초 지연)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // localStorage에서 로그인 상태 확인 (실제 환경과 동일하게)
-      const savedLoginState = localStorage.getItem('isYouLogined');
-
-      if (!savedLoginState) {
-        // 로그인 정보가 없으면 mock 데이터로 임시 설정
-        console.log('로그인 정보가 없어 mock 데이터를 사용합니다.');
-      }
-
-      // Mock 데이터 설정
-      setMemData(userData);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // 컴포넌트 마운트 시 사용자 정보 새로고침
   useEffect(() => {
-    getUserinfoDTA();
-  }, []);
+    const fetchUserInfo = async () => {
+      if (user) {
+        setIsLoading(true);
+        try {
+          await refreshUserInfo();
+        } catch (err) {
+          setError('사용자 정보를 불러오는 중 오류가 발생했습니다.');
+          console.error('사용자 정보 새로고침 오류:', err);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUserInfo();
+  }, []); // 빈 배열로 컴포넌트 마운트 시에만 실행
 
   // 날짜 포맷팅 함수
   const formatDate = (str) => {
@@ -52,21 +40,19 @@ function UserPage() {
     return new Date(str).toLocaleDateString('ko-KR');
   };
 
-  // 페이지 이동 함수들 (실제 프로젝트에서는 useNavigate 사용)
+  // 페이지 이동 함수들
   const goToEdit = () => {
     navigate(ROUTES.MODIFY_USER);
   };
 
   const goToExit = () => {
     if (confirm('정말 회원 탈퇴 페이지로 이동하시겠습니까?')) {
-      // 기존 alert 대신 실제 페이지 이동
       navigate(ROUTES.WITHDRAWAL);
     }
   };
 
   const goToHome = () => {
-    alert('홈페이지로 이동합니다. (실제 환경에서는 / 페이지로 이동)');
-    // window.location.href = '/';
+    navigate(ROUTES.ROOT); // 실제 홈페이지로 이동
   };
 
   // 카테고리 모달 토글
@@ -85,10 +71,12 @@ function UserPage() {
     }
   };
 
-  // 포인트 사용 기능 (Mock)
-  const usePoints = () => {
+  // 포인트 사용 기능
+  const usePoints = async () => {
+    if (!user) return;
+
     const pointsToUse = prompt(
-      `사용할 포인트를 입력하세요 (보유: ${MemData.ppnt?.toLocaleString()} P):`,
+      `사용할 포인트를 입력하세요 (보유: ${user.ppnt?.toLocaleString()} P):`,
     );
     const points = parseInt(pointsToUse);
 
@@ -99,22 +87,20 @@ function UserPage() {
       return;
     }
 
-    if (points > MemData.ppnt) {
+    if (points > (user.ppnt || 0)) {
       alert('보유 포인트가 부족합니다.');
       return;
     }
 
-    // Mock 포인트 차감
-    setMemData((prev) => ({
-      ...prev,
-      ppnt: prev.ppnt - points,
-    }));
-
+    // TODO: 실제 포인트 사용 API 호출
     alert(`${points.toLocaleString()} P가 사용되었습니다!`);
+
+    // 사용자 정보 새로고침
+    await refreshUserInfo();
   };
 
   // 로딩 상태
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
       <div style={styles.container}>
         <div style={styles.loading}>불러오는 중...</div>
@@ -132,10 +118,10 @@ function UserPage() {
   }
 
   // 사용자 데이터가 없을 때
-  if (!MemData) {
+  if (!user) {
     return (
       <div style={styles.container}>
-        <div style={styles.error}>사용자 정보를 찾을 수 없습니다.</div>
+        <div style={styles.error}>로그인이 필요합니다.</div>
       </div>
     );
   }
@@ -157,8 +143,10 @@ function UserPage() {
           <div style={styles.profileImageContainer}>
             <img
               src={
-                MemData.pphoto
-                  ? `http://localhost:7474/member.photo/${MemData.pphoto}`
+                user.pphoto
+                  ? user.pphoto.startsWith('data:')
+                    ? user.pphoto
+                    : `http://localhost:7474/member.photo/${user.pphoto}`
                   : 'https://via.placeholder.com/100x100/ddd/666?text=USER'
               }
               alt="프로필"
@@ -166,10 +154,10 @@ function UserPage() {
             />
           </div>
           <div style={styles.profileInfo}>
-            <h2 style={styles.nickname}>{MemData.nick} 님</h2>
-            <p style={styles.infoText}>아이디: {MemData.id}</p>
-            <p style={styles.infoText}>가입일: {formatDate(MemData.regd)}</p>
-            {MemData.bir && <p style={styles.infoText}>생년월일: {formatDate(MemData.bir)}</p>}
+            <h2 style={styles.nickname}>{user.nick} 님</h2>
+            <p style={styles.infoText}>아이디: {user.id}</p>
+            <p style={styles.infoText}>가입일: {formatDate(user.regd)}</p>
+            {user.bir && <p style={styles.infoText}>생년월일: {formatDate(user.bir)}</p>}
           </div>
         </div>
 
@@ -179,7 +167,7 @@ function UserPage() {
             <div style={styles.pointIcon}>💰</div>
             <div style={styles.pointInfo}>
               <p style={styles.pointLabel}>보유 포인트</p>
-              <p style={styles.pointValue}>{MemData.ppnt?.toLocaleString() ?? 0} P</p>
+              <p style={styles.pointValue}>{user.ppnt?.toLocaleString() ?? 0} P</p>
             </div>
             <button onClick={usePoints} style={styles.usePointButton}>
               포인트 사용
@@ -250,7 +238,7 @@ function UserPage() {
   );
 }
 
-// 스타일 정의
+// 스타일 정의 (기존과 동일)
 const styles = {
   pageContainer: {
     minHeight: '100vh',
