@@ -16,7 +16,7 @@ const deleteAccount = () => {};
 const getUserInfo = () => {};
 const logout = () => {};
 
-const API = {
+const USER_API = {
   login,
   register,
   verifyToken,
@@ -30,4 +30,4 @@ const API = {
   logout,
 };
 
-export default API;
+export default USER_API;

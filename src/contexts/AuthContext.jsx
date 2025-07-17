@@ -1,10 +1,11 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useReducer, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import API from '../services/mock/mockUser.js';
+import USER_API from '../services/mock/mockUser.js';
+import MOCKDATA from '../assets/mockData.js';
 
 // 실제 백엔드 연결시
-// import API from '../services/back/userApi.js';
+// import USER_API from '../services/back/userApi.js';
 
 const AuthContext = createContext();
 
@@ -67,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
       if (token && userData) {
         try {
-          const response = await API.verifyToken(token);
+          const response = await USER_API.verifyToken(token);
           if (response.success) {
             action({
               type: 'LOGIN_SUCCESS',
@@ -93,7 +94,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'LOGIN_START' });
 
     try {
-      const result = await API.login(credentials);
+      const result = await USER_API.login(credentials);
 
       if (result.success) {
         // JWT 토큰을 localStorage에 저장
@@ -108,7 +109,7 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        toast.success(`${result.data.user.nickname}님, 환영합니다! 🎉`);
+        toast.success(`${result.data.user.nick}님, 환영합니다! 🎉`);
         return { success: true, user: result.data.user };
       }
     } catch (error) {
@@ -123,7 +124,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await API.register(userData);
+      const result = await USER_API.register(userData);
 
       if (result.success) {
         toast.success(result.message);
@@ -134,13 +135,14 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: error.message };
     } finally {
       action({ type: 'SET_LOADING', payload: false });
+      console.log(MOCKDATA.mockUserData);
     }
   };
 
   // 아이디 중복 확인
   const checkIdDuplicateHandler = async (id) => {
     try {
-      const result = await API.checkIdDuplicate(id);
+      const result = await USER_API.checkIdDuplicate(id);
       return result;
     } catch (error) {
       toast.error('아이디 중복 확인 중 오류가 발생했습니다.');
@@ -151,7 +153,7 @@ export const AuthProvider = ({ children }) => {
   // 닉네임 중복 확인
   const checkNicknameDuplicateHandler = async (nickname) => {
     try {
-      const result = await API.checkNicknameDuplicate(nickname);
+      const result = await USER_API.checkNicknameDuplicate(nickname);
       return result;
     } catch (error) {
       toast.error('닉네임 중복 확인 중 오류가 발생했습니다.');
@@ -169,7 +171,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await API.updateUserInfo(state.user.id, updateData);
+      const result = await USER_API.updateUserInfo(state.user.id, updateData);
 
       if (result.success) {
         // 로컬 스토리지 업데이트
@@ -202,7 +204,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await API.deleteAccount(state.user.id, passwordData);
+      const result = await USER_API.deleteAccount(state.user.id, passwordData);
 
       if (result.success) {
         // 로컬 스토리지 정리
@@ -230,7 +232,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const result = await API.getUserInfo(state.user.id);
+      const result = await USER_API.getUserInfo(state.user.id);
 
       if (result.success) {
         // 로컬 스토리지 업데이트
@@ -275,7 +277,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await API.verifyToken(token);
+      const response = await USER_API.verifyToken(token);
 
       if (!response.success) {
         logoutHandler();
