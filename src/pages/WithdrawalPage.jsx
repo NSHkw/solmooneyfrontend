@@ -198,7 +198,7 @@ const CompletionText = styled.div`
 
 const WithdrawalPage = () => {
   const navigate = useNavigate();
-  const { user, deleteAccount, loading } = useAuth();
+  const { user, deleteAccount, verifyPassword, loading } = useAuth();
 
   // 현재 단계 상태 (1: 비밀번호 확인, 2: 최종 확인, 3: 완료)
   const [currentStep, setCurrentStep] = useState(1);
@@ -209,7 +209,7 @@ const WithdrawalPage = () => {
     navigate(ROUTES.USER);
   };
 
-  // 1단계: 비밀번호 확인
+  // 1단계: 비밀번호 확인 (AuthContext의 verifyPassword 사용)
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
@@ -218,13 +218,15 @@ const WithdrawalPage = () => {
       return;
     }
 
-    // 비밀번호가 맞는지 확인 (실제로는 서버에서 확인하지만, 여기서는 간단히 체크)
     try {
-      // Mock API의 deleteAccount는 실제 삭제까지 하므로, 여기서는 단순히 다음 단계로
-      setCurrentStep(2);
-      toast.success('비밀번호가 확인되었습니다.');
+      const result = await verifyPassword(password);
+
+      if (result.success) {
+        setCurrentStep(2);
+        toast.success('비밀번호가 확인되었습니다.');
+      }
     } catch (error) {
-      toast.error('비밀번호 확인 중 오류가 발생했습니다.');
+      toast.error(error.message || '비밀번호 확인 중 오류가 발생했습니다.');
     }
   };
 
