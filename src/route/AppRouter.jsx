@@ -16,10 +16,10 @@ import ModifyUserPage from '../pages/ModifyUserPage.jsx';
 function AppRouter() {
   return (
     <Routes>
-      {/* Layout 없는 페이지들 - 사이드바 없는 것 */}
+      {/* 레이아웃(사이드바) X, 토큰 없는 경우 가능한 페이지 */}
       <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
-      {/* 인증이 필요한 Layout 없는 페이지들 */}
+      {/* 레이아웃 X, 토큰 있는 경우 가능한 페이지 */}
       <Route
         path={ROUTES.USER}
         element={
@@ -29,7 +29,25 @@ function AppRouter() {
         }
       />
 
-      {/* Layout이 있는 페이지들 - 사이드바 있는 것 (모두 인증 필요) */}
+      <Route
+        path={ROUTES.WITHDRAWAL}
+        element={
+          <ProtectedRoute>
+            <WithdrawalPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path={ROUTES.MODIFY_USER}
+        element={
+          <ProtectedRoute>
+            <ModifyUserPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 레이아웃 O, 토큰 있는 경우 가능한 페이지 */}
       <Route
         path={ROUTES.ROOT}
         element={
@@ -81,24 +99,6 @@ function AppRouter() {
             <Layout>
               <SubscriptionPage />
             </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.WITHDRAWAL}
-        element={
-          <ProtectedRoute>
-            <WithdrawalPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path={ROUTES.MODIFY_USER}
-        element={
-          <ProtectedRoute>
-            <ModifyUserPage />
           </ProtectedRoute>
         }
       />

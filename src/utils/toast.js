@@ -2,11 +2,28 @@
 import { toast } from 'react-toastify';
 
 /**
- * Toast 유틸리티 함수들
- * App.jsx에 ToastContainer가 전역으로 설정되어 있어 어디서든 사용 가능
+ * Toast 중앙 집중식 설정 관리
+ * App.jsx의 ToastContainer와 개별 toast 함수에서 모두 사용
  */
 
-// 기본 toast 설정
+// 🔹 ToastContainer용 전역 설정 (App.jsx에서 사용)
+export const TOAST_CONTAINER_CONFIG = {
+  position: 'top-right',
+  autoClose: 3000,
+  hideProgressBar: false,
+  newestOnTop: false,
+  closeOnClick: true,
+  rtl: false,
+  pauseOnFocusLoss: true,
+  draggable: true,
+  pauseOnHover: true,
+  theme: 'light',
+  toastClassName: 'custom-toast',
+  bodyClassName: 'custom-toast-body',
+  progressClassName: 'custom-toast-progress',
+};
+
+// 🔹 개별 toast 함수용 기본 설정
 const defaultOptions = {
   position: 'top-right',
   autoClose: 3000,
@@ -120,40 +137,14 @@ export const dismiss = (toastId) => {
 };
 
 /**
- * 사용 예시:
+ * 🎯 사용 예시:
  *
- * // 기본 사용
+ * // App.jsx에서
+ * import { TOAST_CONTAINER_CONFIG } from '@utils/toast';
+ * <ToastContainer {...TOAST_CONTAINER_CONFIG} />
+ *
+ * // 다른 컴포넌트에서
  * import { showSuccess, showError } from '@utils/toast';
  * showSuccess('저장되었습니다!');
  * showError('오류가 발생했습니다.');
- *
- * // 커스텀 옵션
- * showSuccess('성공!', {
- *   autoClose: 5000,
- *   position: "bottom-right"
- * });
- *
- * // 로딩 처리
- * const toastId = showLoading('저장 중...');
- * // API 호출 후
- * updateLoadingSuccess(toastId, '저장 완료!');
- *
- * // Promise 처리
- * showPromise(
- *   apiCall(),
- *   {
- *     pending: '처리 중...',
- *     success: '성공적으로 처리되었습니다!',
- *     error: '처리 중 오류가 발생했습니다.'
- *   }
- * );
- *
- * // 커스텀 JSX
- * showCustom(
- *   <div>
- *     <strong>알림</strong>
- *     <br />
- *     새로운 메시지가 도착했습니다.
- *   </div>
- * );
  */

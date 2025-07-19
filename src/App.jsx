@@ -3,8 +3,9 @@ import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AppRouter from '@route/AppRouter';
-import { AuthProvider } from '@contexts/AuthContext';
+import AppRouter from '../route/AppRouter';
+import { AuthProvider } from '../contexts/AuthContext';
+import { TOAST_CONTAINER_CONFIG } from '../utils/toast';
 
 function App() {
   return (
@@ -13,22 +14,8 @@ function App() {
         <AuthProvider>
           <AppRouter />
 
-          {/* 전역 Toast Container - 모든 페이지에서 사용 가능 */}
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-            toastClassName="custom-toast"
-            bodyClassName="custom-toast-body"
-            progressClassName="custom-toast-progress"
-          />
+          {/* 중앙 집중식 Toast 설정 사용 */}
+          <ToastContainer {...TOAST_CONTAINER_CONFIG} />
         </AuthProvider>
       </BrowserRouter>
     </div>
