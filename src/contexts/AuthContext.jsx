@@ -1,8 +1,8 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useReducer } from 'react';
 import { toast } from 'react-toastify';
-import USER_API from '../services/mock/mockUser.js';
-import MOCKDATA from '../assets/mockData.js'; // 없어도 됨(콘솔로그 한 거)
+import USER_API from '../services/back/userApi.js';
+// import MOCKDATA from '../assets/mockData.js'; // 없어도 됨(콘솔로그 한 거)
 
 // 실제 백엔드 연결시
 // import USER_API from '../services/back/userApi.js';
@@ -89,9 +89,11 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const result = await USER_API.login(credentials);
+      console.log('authcontext');
 
       if (result.success) {
         // JWT 토큰을 localStorage에 저장
+
         localStorage.setItem('token', result.data.token);
         localStorage.setItem('userData', JSON.stringify(result.data.user));
 
@@ -129,7 +131,6 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: error.message };
     } finally {
       action({ type: 'SET_LOADING', payload: false });
-      console.log(MOCKDATA.mockUserData);
     }
   };
 
@@ -270,6 +271,7 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
 
+    console.log('poiuytrew');
     try {
       const response = await USER_API.verifyToken(token);
 

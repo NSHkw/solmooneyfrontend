@@ -6,7 +6,7 @@ import useAuth from '../contexts/useAuth.jsx';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../route/routes';
 import logo_nuki from '../img/logo_nuki.png';
-import API from '../services/mock/mockUser.js';
+import API from '../services/back/userApi.js';
 import S from '../styles/loginPage.style.js';
 
 function LoginPage() {
@@ -22,6 +22,7 @@ function LoginPage() {
     nickname: '',
     birthDate: '',
   });
+
   // 검증 상태들
   const [isIdChecked, setIsIdChecked] = useState(false);
   const [isNicknameChecked, setIsNicknameChecked] = useState(false);
