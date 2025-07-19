@@ -3,9 +3,9 @@ import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import AppRouter from '../route/AppRouter';
-import { AuthProvider } from '../contexts/AuthContext';
-import { TOAST_CONTAINER_CONFIG } from '../utils/toast';
+import AppRouter from './route/AppRouter';
+import { AuthProvider } from './contexts/AuthContext';
+import { TOAST_CONTAINER_CONFIG } from './utils/toast';
 
 function App() {
   return (
