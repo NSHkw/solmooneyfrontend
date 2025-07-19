@@ -105,7 +105,7 @@ const register = async (userData) => {
 // ✅ 토큰 검증 API (기본 구조만)
 const verifyToken = async (token) => {
   try {
-    const response = await fetch(`${SERVER_URL}/verify-token`, {
+    const response = await fetch(`${SERVER_URL}/do.logincheck`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
