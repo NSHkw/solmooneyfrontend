@@ -105,6 +105,7 @@ const mockCategory = [
 ];
 
 // 수입/지출 데이터 (MOONEY_EXPENSE 테이블 구조에 정확히 맞춤)
+// 수입/지출 데이터 (MOONEY_EXPENSE 테이블 구조에 정확히 맞춤)
 const mockExpenseData = [
   // === 구독 예정 (PENDING) - 현재 달 예정 ===
   {
@@ -118,6 +119,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-25'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY', // 월간
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 2,
@@ -130,6 +132,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-28'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 3,
@@ -142,6 +145,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-15'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 2, // 업무/생산성
   },
   {
     mexpId: 4,
@@ -154,6 +158,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-01'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 3, // 클라우드 저장소
   },
   {
     mexpId: 5,
@@ -166,6 +171,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-20'),
     mexpStatus: 'OVERDUE', // 연체
     mexpFrequency: 'MONTHLY',
+    mcatId: 4, // 쇼핑
   },
 
   // === 추가 구독 서비스 (PENDING) ===
@@ -180,6 +186,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-30'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 8,
@@ -192,6 +199,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-05'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 9,
@@ -204,6 +212,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-10'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 10,
@@ -216,6 +225,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-20'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 2, // 업무/생산성
   },
   {
     mexpId: 11,
@@ -228,6 +238,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-09-01'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 2, // 업무/생산성
   },
   {
     mexpId: 12,
@@ -240,6 +251,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-22'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 2, // 업무/생산성
   },
 
   // === 구독 완료 (COMPLETED) - 최근 결제한 것들 ===
@@ -254,7 +266,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-06-25'), // 원래 예정일
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
-    mcatId: 1,
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 102,
@@ -267,6 +279,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-01'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 3, // 클라우드 저장소
   },
   {
     mexpId: 103,
@@ -279,6 +292,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-06-28'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
 
   // === 다른 사용자 구독 데이터 ===
@@ -293,6 +307,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-24'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
   {
     mexpId: 202,
@@ -305,6 +320,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-03'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
+    mcatId: 2, // 업무/생산성
   },
   {
     mexpId: 203,
@@ -317,6 +333,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-07-05'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1, // 엔터테인먼트
   },
 
   // === 일반 지출 데이터 (비반복, 가계부용) ===
@@ -331,6 +348,7 @@ const mockExpenseData = [
     mexpRptdd: null, // 비반복이므로 예정일 없음
     mexpStatus: 'COMPLETED',
     mexpFrequency: null, // 비반복이므로 주기 없음
+    mcatId: 6, // 식비
   },
   {
     mexpId: 302,
@@ -343,6 +361,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 303,
@@ -355,6 +374,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 7, // 교통비
   },
   {
     mexpId: 304,
@@ -367,6 +387,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 305,
@@ -379,6 +400,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 4, // 쇼핑
   },
 
   // === 수입 데이터 (Income) ===
@@ -393,6 +415,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-01'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 5, // 기타 (수입은 보통 기타로 분류)
   },
   {
     mexpId: 402,
@@ -405,6 +428,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 5, // 기타
   },
   {
     mexpId: 403,
@@ -417,6 +441,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-08-01'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 5, // 기타
   },
 
   // === 챌린지 페이지용 더미 데이터 (최근 소비 데이터 추가) ===
@@ -431,6 +456,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 502,
@@ -443,6 +469,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 503,
@@ -455,6 +482,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 504,
@@ -467,6 +495,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 4, // 쇼핑
   },
   {
     mexpId: 505,
@@ -479,6 +508,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 7, // 교통비
   },
   {
     mexpId: 506,
@@ -491,6 +521,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 6, // 식비
   },
   {
     mexpId: 507,
@@ -503,6 +534,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 4, // 쇼핑
   },
   {
     mexpId: 508,
@@ -515,6 +547,7 @@ const mockExpenseData = [
     mexpRptdd: null,
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
+    mcatId: 9, // 건강/의료
   },
 ];
 
