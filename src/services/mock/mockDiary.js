@@ -3,7 +3,7 @@ import MOCKDATA from '../../assets/mockData';
 
 /**
  * 다이어리 관련 Mock API
- * mockData 구조에 정확히 맞춤: { diaryId, userId, date, text }
+ * mockData 구조: { mdiaId, mdiaMmemId, mdiaDate, mdiaContent }
  * 백엔드 연결 시 이 파일만 실제 API 호출로 변경하면 됨
  */
 
@@ -26,19 +26,22 @@ const getDiaryByDate = async (userId, date) => {
   try {
     const dateKey = formatDateKey(date);
 
-    // mockData에서 일기 찾기
+    // mockData에서 일기 찾기 (날짜는 Date 객체이므로 변환 필요)
     const diary = MOCKDATA.mockDiaryData?.find((diary) => {
-      return diary.userId === userId && diary.date === dateKey;
+      const diaryDateKey = formatDateKey(diary.mdiaDate);
+      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
     });
 
     if (diary) {
       return {
         success: true,
         data: {
-          diaryId: diary.diaryId,
-          userId: diary.userId,
-          date: diary.date,
-          text: diary.text,
+          mdiaId: diary.mdiaId,
+          mdiaMmemId: diary.mdiaMmemId,
+          mdiaDate: diary.mdiaDate,
+          mdiaContent: diary.mdiaContent,
+          // DiaryPage에서 사용하는 text 필드로 매핑
+          text: diary.mdiaContent,
         },
       };
     }
@@ -71,29 +74,31 @@ const saveDiary = async (userId, date, text) => {
     const dateKey = formatDateKey(date);
 
     // mockData에서 기존 일기 찾기
-    const existingDiaryIndex = MOCKDATA.mockDiaryData?.findIndex((diary) => {
-      return diary.userId === userId && diary.date === dateKey;
+    if (!MOCKDATA.mockDiaryData) {
+      MOCKDATA.mockDiaryData = [];
+    }
+
+    const existingDiaryIndex = MOCKDATA.mockDiaryData.findIndex((diary) => {
+      const diaryDateKey = formatDateKey(diary.mdiaDate);
+      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
     });
 
     let savedDiary;
 
     if (existingDiaryIndex !== -1) {
       // 기존 일기 수정
-      MOCKDATA.mockDiaryData[existingDiaryIndex].text = text.trim();
+      MOCKDATA.mockDiaryData[existingDiaryIndex].mdiaContent = text.trim();
       savedDiary = MOCKDATA.mockDiaryData[existingDiaryIndex];
       console.log(`일기 수정 완료: ${userId}, ${dateKey}`);
     } else {
       // 새 일기 생성
       const newDiary = {
-        diaryId: Math.max(...(MOCKDATA.mockDiaryData?.map((d) => d.diaryId) || [0]), 0) + 1,
-        userId: userId,
-        date: dateKey,
-        text: text.trim(),
+        mdiaId: Math.max(...(MOCKDATA.mockDiaryData.map((d) => d.mdiaId) || [0]), 0) + 1,
+        mdiaMmemId: userId,
+        mdiaDate: new Date(date),
+        mdiaContent: text.trim(),
       };
 
-      if (!MOCKDATA.mockDiaryData) {
-        MOCKDATA.mockDiaryData = [];
-      }
       MOCKDATA.mockDiaryData.push(newDiary);
       savedDiary = newDiary;
       console.log(`새 일기 생성 완료: ${userId}, ${dateKey}`);
@@ -103,10 +108,12 @@ const saveDiary = async (userId, date, text) => {
       success: true,
       message: existingDiaryIndex !== -1 ? '일기가 수정되었습니다.' : '일기가 저장되었습니다.',
       data: {
-        diaryId: savedDiary.diaryId,
-        userId: savedDiary.userId,
-        date: savedDiary.date,
-        text: savedDiary.text,
+        mdiaId: savedDiary.mdiaId,
+        mdiaMmemId: savedDiary.mdiaMmemId,
+        mdiaDate: savedDiary.mdiaDate,
+        mdiaContent: savedDiary.mdiaContent,
+        // DiaryPage에서 사용하는 text 필드로 매핑
+        text: savedDiary.mdiaContent,
       },
     };
   } catch (error) {
@@ -128,8 +135,13 @@ const deleteDiary = async (userId, date) => {
     const dateKey = formatDateKey(date);
 
     // mockData에서 일기 찾기
-    const diaryIndex = MOCKDATA.mockDiaryData?.findIndex((diary) => {
-      return diary.userId === userId && diary.date === dateKey;
+    if (!MOCKDATA.mockDiaryData) {
+      throw new Error('삭제할 일기를 찾을 수 없습니다.');
+    }
+
+    const diaryIndex = MOCKDATA.mockDiaryData.findIndex((diary) => {
+      const diaryDateKey = formatDateKey(diary.mdiaDate);
+      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
     });
 
     if (diaryIndex === -1) {
@@ -144,7 +156,7 @@ const deleteDiary = async (userId, date) => {
       success: true,
       message: '일기가 삭제되었습니다.',
       data: {
-        deletedId: deletedDiary.diaryId,
+        deletedId: deletedDiary.mdiaId,
         deletedDate: dateKey,
       },
     };
@@ -163,18 +175,30 @@ const getAllDiaries = async (userId) => {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
   try {
-    const diaries =
-      MOCKDATA.mockDiaryData
-        ?.filter((diary) => diary.userId === userId)
-        ?.map((diary) => ({
-          diaryId: diary.diaryId,
-          userId: diary.userId,
-          date: diary.date,
-          text: diary.text,
-        })) || [];
+    if (!MOCKDATA.mockDiaryData) {
+      return {
+        success: true,
+        data: {
+          diaries: [],
+          totalCount: 0,
+        },
+      };
+    }
+
+    const diaries = MOCKDATA.mockDiaryData
+      .filter((diary) => diary.mdiaMmemId === userId)
+      .map((diary) => ({
+        mdiaId: diary.mdiaId,
+        mdiaMmemId: diary.mdiaMmemId,
+        mdiaDate: diary.mdiaDate,
+        mdiaContent: diary.mdiaContent,
+        // DiaryPage에서 사용하는 필드로 매핑
+        text: diary.mdiaContent,
+        date: formatDateKey(diary.mdiaDate),
+      }));
 
     // 날짜순 정렬 (최신순)
-    diaries.sort((a, b) => new Date(b.date) - new Date(a.date));
+    diaries.sort((a, b) => new Date(b.mdiaDate) - new Date(a.mdiaDate));
 
     return {
       success: true,
@@ -202,7 +226,7 @@ const getDiariesByMonth = async (userId, year, month) => {
   try {
     const allDiaries = await getAllDiaries(userId);
     const monthDiaries = allDiaries.data.diaries.filter((diary) => {
-      const diaryDate = new Date(diary.date);
+      const diaryDate = new Date(diary.mdiaDate);
       return diaryDate.getFullYear() === year && diaryDate.getMonth() + 1 === month;
     });
 
@@ -244,7 +268,8 @@ const getDiaryStats = async (userId, year, month) => {
     const averageLength =
       diaries.length > 0
         ? Math.round(
-            diaries.reduce((sum, diary) => sum + (diary.text?.length || 0), 0) / diaries.length,
+            diaries.reduce((sum, diary) => sum + (diary.mdiaContent?.length || 0), 0) /
+              diaries.length,
           )
         : 0;
 
@@ -257,9 +282,10 @@ const getDiaryStats = async (userId, year, month) => {
         writtenDays,
         writeRate,
         averageLength,
-        longestEntry: diaries.length > 0 ? Math.max(...diaries.map((d) => d.text?.length || 0)) : 0,
+        longestEntry:
+          diaries.length > 0 ? Math.max(...diaries.map((d) => d.mdiaContent?.length || 0)) : 0,
         shortestEntry:
-          diaries.length > 0 ? Math.min(...diaries.map((d) => d.text?.length || 0)) : 0,
+          diaries.length > 0 ? Math.min(...diaries.map((d) => d.mdiaContent?.length || 0)) : 0,
       },
     };
   } catch (error) {
@@ -284,7 +310,7 @@ const searchDiaries = async (userId, keyword) => {
 
     const allDiaries = await getAllDiaries(userId);
     const searchResults = allDiaries.data.diaries.filter((diary) => {
-      return diary.text?.toLowerCase().includes(keyword.toLowerCase());
+      return diary.mdiaContent?.toLowerCase().includes(keyword.toLowerCase());
     });
 
     return {

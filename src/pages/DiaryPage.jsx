@@ -6,28 +6,24 @@ import '../css/DiaryPage.css';
 import diaryImg from '../img/pencil_mooney.png';
 import CategoryChart from '../components/CategoryChart';
 import EXPENSE_API from './../services/mock/mockExpense';
+import DIARY_API from './../services/mock/mockDiary';
 
 const DiaryPage = () => {
   const [date, setDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [diaryText, setDiaryText] = useState('');
-  const [savedDiaries, setSavedDiaries] = useState({});
   const [editMode, setEditMode] = useState(false);
-  const [mood, setMood] = useState('😀');
-  const [summary, setSummary] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 소비 내역 상태 추가
+  // 소비 내역 상태
   const [expenseData, setExpenseData] = useState({
     income: 0,
     totalExpense: 0,
     chartData: [],
   });
 
-  const formatDateKey = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(
-      2,
-      '0',
-    )}`;
+  // 현재 사용자 ID (실제로는 인증 컨텍스트에서 가져와야 함)
+  const currentUserId = 'user001';
 
   const formatDisplayDate = (d) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 
@@ -36,53 +32,85 @@ const DiaryPage = () => {
     return new Intl.NumberFormat('ko-KR').format(amount);
   };
 
-  // 날짜가 바뀔 때마다 소비 내역과 일기 데이터 로드
-  useEffect(() => {
-    // 일기 데이터 로드
-    const stored = localStorage.getItem('diaries');
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      setSavedDiaries(parsed);
-      const key = formatDateKey(date);
-      setDiaryText(parsed[key]?.text || '');
-      setSummary(parsed[key]?.summary || '');
-      setMood(parsed[key]?.mood || '😀');
-    } else {
-      // 저장된 일기가 없을 때 초기화
+  // 일기 데이터 로드 함수
+  const loadDiaryData = async () => {
+    setIsLoading(true);
+    try {
+      const diaryResult = await DIARY_API.getDiaryByDate(currentUserId, date);
+
+      if (diaryResult.data) {
+        setDiaryText(diaryResult.data.text || '');
+      } else {
+        setDiaryText('');
+      }
+    } catch (error) {
+      console.error('일기 데이터 로드 오류:', error);
       setDiaryText('');
-      setSummary('');
-      setMood('😀');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    // 소비 내역 데이터 로드
-    const dayExpenseData = EXPENSE_API.getExpensesByDate(date, 'user001');
+  // 소비 내역 로드 함수
+  const loadExpenseData = () => {
+    const dayExpenseData = EXPENSE_API.getExpensesByDate(date, currentUserId);
 
-    // 실제 데이터가 없으면 샘플 데이터 사용
-    if (dayExpenseData.totalExpense === 0 && dayExpenseData.income === 0) {
-      const sampleData = EXPENSE_API.generateSampleDataForDate(date);
-      setExpenseData(sampleData);
-    } else {
-      setExpenseData(dayExpenseData);
-    }
+    // 샘플 데이터 생성 로직 완전 삭제
+    // 실제 mockData에 있는 데이터만 사용
+    setExpenseData(dayExpenseData);
+  };
+
+  // 날짜가 바뀔 때마다 데이터 로드
+  useEffect(() => {
+    loadDiaryData();
+    loadExpenseData(); // 이제 실제 데이터만 로드
   }, [date]);
 
-  const saveDiary = () => {
-    const key = formatDateKey(date);
-    const updated = {
-      ...savedDiaries,
-      [key]: {
-        text: diaryText,
-        summary,
-        mood,
-      },
-    };
-    setSavedDiaries(updated);
-    localStorage.setItem('diaries', JSON.stringify(updated));
-    setEditMode(false);
+  // 일기 저장 함수
+  const saveDiary = async () => {
+    if (!diaryText.trim()) {
+      alert('일기 내용을 입력해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await DIARY_API.saveDiary(currentUserId, date, diaryText);
+      setEditMode(false);
+      await loadDiaryData(); // 저장 후 다시 로드
+      console.log('일기 저장 완료');
+    } catch (error) {
+      console.error('일기 저장 오류:', error);
+      alert('일기 저장 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 일기 삭제 함수
+  const deleteDiary = async () => {
+    if (!window.confirm('정말로 이 일기를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await DIARY_API.deleteDiary(currentUserId, date);
+      await loadDiaryData(); // 삭제 후 다시 로드
+      console.log('일기 삭제 완료');
+    } catch (error) {
+      console.error('일기 삭제 오류:', error);
+      alert('일기 삭제 중 오류가 발생했습니다: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // 일기 내용이 있는지 확인하여 버튼 텍스트 결정
   const getButtonText = () => {
+    if (isLoading) {
+      return '⏳ 처리중...';
+    }
     if (editMode) {
       return '💾 저장';
     }
@@ -90,6 +118,8 @@ const DiaryPage = () => {
   };
 
   const handleButtonClick = () => {
+    if (isLoading) return;
+
     if (editMode) {
       saveDiary();
     } else {
@@ -115,6 +145,7 @@ const DiaryPage = () => {
                   onChange={(newDate) => {
                     setDate(newDate);
                     setShowCalendar(false);
+                    setEditMode(false); // 날짜 변경 시 편집 모드 해제
                   }}
                   value={date}
                 />
@@ -146,97 +177,69 @@ const DiaryPage = () => {
 
       <div className="right-panel">
         <div className="diary-box">
-          <h2>Diary</h2>
+          {/* 헤더에 삭제 버튼 추가 */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2>Diary</h2>
+            {!editMode && diaryText.trim() && !isLoading && (
+              <button
+                onClick={deleteDiary}
+                style={{
+                  background: '#dc3545',
+                  color: 'white',
+                  border: 'none',
+                  padding: '5px 10px',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                🗑️ 삭제
+              </button>
+            )}
+          </div>
 
-          {editMode ? (
+          {/* 로딩 상태 표시 */}
+          {isLoading && (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#666',
+                fontSize: '16px',
+              }}
+            >
+              ⏳ 로딩 중...
+            </div>
+          )}
+
+          {/* 편집 모드 */}
+          {!isLoading && editMode ? (
             <>
               <textarea
                 value={diaryText}
                 onChange={(e) => setDiaryText(e.target.value)}
                 placeholder="오늘의 소비와 하루를 돌아보며 일기를 작성해보세요..."
               />
-              <textarea
-                className="one-line-thought"
-                placeholder="오늘의 한 줄 요약 ✍️"
-                value={summary}
-                onChange={(e) => setSummary(e.target.value)}
-                style={{
-                  height: '50px',
-                  marginTop: '10px',
-                  fontSize: '14px',
-                }}
-              />
-              <div
-                className="mood-selector"
-                style={{
-                  margin: '15px 0',
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
-              >
-                오늘 기분:
-                {['😀', '😐', '😴', '😔'].map((face) => (
-                  <span
-                    key={face}
-                    onClick={() => setMood(face)}
-                    style={{
-                      opacity: mood === face ? 1 : 0.4,
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      padding: '5px',
-                    }}
-                  >
-                    {face}
-                  </span>
-                ))}
-              </div>
               <button onClick={handleButtonClick}>{getButtonText()}</button>
             </>
           ) : (
-            <>
-              <div className="lined-paper">
-                {diaryText ? (
-                  diaryText.split('\n').map((line, idx) => (
-                    <div className="paper-line" key={idx}>
-                      {line || <span>&nbsp;</span>}
-                    </div>
-                  ))
-                ) : (
-                  <p className="empty-msg">아직 작성된 일기가 없습니다 😊</p>
-                )}
-              </div>
-              <div
-                className="summary-and-mood"
-                style={{
-                  padding: '15px 0',
-                  borderTop: '1px solid #f0f4f8',
-                  marginTop: '15px',
-                }}
-              >
-                <p
-                  className="summary-display"
-                  style={{
-                    fontSize: '16px',
-                    color: '#37485c',
-                    marginBottom: '8px',
-                  }}
-                >
-                  오늘의 한 마디: {summary || '💬'}
-                </p>
-                <p
-                  className="mood-display"
-                  style={{
-                    fontSize: '16px',
-                    color: '#37485c',
-                  }}
-                >
-                  오늘 기분: {mood}
-                </p>
-              </div>
-              <button onClick={handleButtonClick}>{getButtonText()}</button>
-            </>
+            /* 읽기 모드 */
+            !isLoading && (
+              <>
+                <div className="lined-paper">
+                  {diaryText ? (
+                    diaryText.split('\n').map((line, idx) => (
+                      <div className="paper-line" key={idx}>
+                        {line || <span>&nbsp;</span>}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="empty-msg">아직 작성된 일기가 없습니다 😊</p>
+                  )}
+                </div>
+                <button onClick={handleButtonClick}>{getButtonText()}</button>
+              </>
+            )
           )}
         </div>
       </div>
