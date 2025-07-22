@@ -2,34 +2,52 @@
 import MOCKDATA from '../../assets/mockData';
 
 /**
- * 다이어리 관련 Mock API
+ * 다이어리 관련 Mock API - localStorage의 사용자 데이터 활용
  * mockData 구조: { mdiaId, mdiaMmemId, mdiaDate, mdiaContent }
  * 백엔드 연결 시 이 파일만 실제 API 호출로 변경하면 됨
  */
 
-// 날짜 키 포맷팅
+// localStorage에서 현재 로그인한 사용자 정보 가져오기
+const getCurrentUser = () => {
+  try {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      return JSON.parse(userData);
+    }
+    return null;
+  } catch (error) {
+    console.error('사용자 정보를 불러올 수 없습니다:', error);
+    return null;
+  }
+};
+
+// 날짜 키 포맷팅 유틸리티
 const formatDateKey = (date) => {
   const d = new Date(date);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
 /**
- * 특정 날짜의 일기 조회
- * @param {string} userId - 사용자 ID
+ * 특정 날짜의 일기 조회 (현재 로그인한 사용자)
  * @param {Date|string} date - 날짜
  * @returns {Promise<Object>} - 일기 데이터
  */
-const getDiaryByDate = async (userId, date) => {
+const getDiaryByDate = async (date) => {
   // API 응답 시뮬레이션을 위한 지연
   await new Promise((resolve) => setTimeout(resolve, 300));
 
   try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
     const dateKey = formatDateKey(date);
 
     // mockData에서 일기 찾기 (날짜는 Date 객체이므로 변환 필요)
     const diary = MOCKDATA.mockDiaryData?.find((diary) => {
       const diaryDateKey = formatDateKey(diary.mdiaDate);
-      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
+      return diary.mdiaMmemId === currentUser.id && diaryDateKey === dateKey;
     });
 
     if (diary) {
@@ -57,16 +75,20 @@ const getDiaryByDate = async (userId, date) => {
 };
 
 /**
- * 일기 저장/수정
- * @param {string} userId - 사용자 ID
+ * 일기 저장/수정 (현재 로그인한 사용자)
  * @param {Date|string} date - 날짜
  * @param {string} text - 일기 내용
  * @returns {Promise<Object>} - 저장 결과
  */
-const saveDiary = async (userId, date, text) => {
+const saveDiary = async (date, text) => {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
     if (!text || text.trim().length === 0) {
       throw new Error('일기 내용을 입력해주세요.');
     }
@@ -80,7 +102,7 @@ const saveDiary = async (userId, date, text) => {
 
     const existingDiaryIndex = MOCKDATA.mockDiaryData.findIndex((diary) => {
       const diaryDateKey = formatDateKey(diary.mdiaDate);
-      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
+      return diary.mdiaMmemId === currentUser.id && diaryDateKey === dateKey;
     });
 
     let savedDiary;
@@ -89,19 +111,19 @@ const saveDiary = async (userId, date, text) => {
       // 기존 일기 수정
       MOCKDATA.mockDiaryData[existingDiaryIndex].mdiaContent = text.trim();
       savedDiary = MOCKDATA.mockDiaryData[existingDiaryIndex];
-      console.log(`일기 수정 완료: ${userId}, ${dateKey}`);
+      console.log(`일기 수정 완료: ${currentUser.id}, ${dateKey}`);
     } else {
       // 새 일기 생성
       const newDiary = {
         mdiaId: Math.max(...(MOCKDATA.mockDiaryData.map((d) => d.mdiaId) || [0]), 0) + 1,
-        mdiaMmemId: userId,
+        mdiaMmemId: currentUser.id,
         mdiaDate: new Date(date),
         mdiaContent: text.trim(),
       };
 
       MOCKDATA.mockDiaryData.push(newDiary);
       savedDiary = newDiary;
-      console.log(`새 일기 생성 완료: ${userId}, ${dateKey}`);
+      console.log(`새 일기 생성 완료: ${currentUser.id}, ${dateKey}`);
     }
 
     return {
@@ -123,15 +145,19 @@ const saveDiary = async (userId, date, text) => {
 };
 
 /**
- * 일기 삭제
- * @param {string} userId - 사용자 ID
+ * 일기 삭제 (현재 로그인한 사용자)
  * @param {Date|string} date - 날짜
  * @returns {Promise<Object>} - 삭제 결과
  */
-const deleteDiary = async (userId, date) => {
+const deleteDiary = async (date) => {
   await new Promise((resolve) => setTimeout(resolve, 300));
 
   try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
     const dateKey = formatDateKey(date);
 
     // mockData에서 일기 찾기
@@ -141,7 +167,7 @@ const deleteDiary = async (userId, date) => {
 
     const diaryIndex = MOCKDATA.mockDiaryData.findIndex((diary) => {
       const diaryDateKey = formatDateKey(diary.mdiaDate);
-      return diary.mdiaMmemId === userId && diaryDateKey === dateKey;
+      return diary.mdiaMmemId === currentUser.id && diaryDateKey === dateKey;
     });
 
     if (diaryIndex === -1) {
@@ -150,7 +176,7 @@ const deleteDiary = async (userId, date) => {
 
     // 일기 삭제
     const deletedDiary = MOCKDATA.mockDiaryData.splice(diaryIndex, 1)[0];
-    console.log(`일기 삭제 완료: ${userId}, ${dateKey}`);
+    console.log(`일기 삭제 완료: ${currentUser.id}, ${dateKey}`);
 
     return {
       success: true,
@@ -167,14 +193,18 @@ const deleteDiary = async (userId, date) => {
 };
 
 /**
- * 특정 사용자의 모든 일기 조회
- * @param {string} userId - 사용자 ID
+ * 현재 사용자의 모든 일기 조회
  * @returns {Promise<Object>} - 일기 목록
  */
-const getAllDiaries = async (userId) => {
+const getAllDiaries = async () => {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
   try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
     if (!MOCKDATA.mockDiaryData) {
       return {
         success: true,
@@ -186,7 +216,7 @@ const getAllDiaries = async (userId) => {
     }
 
     const diaries = MOCKDATA.mockDiaryData
-      .filter((diary) => diary.mdiaMmemId === userId)
+      .filter((diary) => diary.mdiaMmemId === currentUser.id)
       .map((diary) => ({
         mdiaId: diary.mdiaId,
         mdiaMmemId: diary.mdiaMmemId,
@@ -213,136 +243,18 @@ const getAllDiaries = async (userId) => {
   }
 };
 
-/**
- * 월별 일기 조회
- * @param {string} userId - 사용자 ID
- * @param {number} year - 연도
- * @param {number} month - 월 (1-12)
- * @returns {Promise<Object>} - 월별 일기 목록
- */
-const getDiariesByMonth = async (userId, year, month) => {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  try {
-    const allDiaries = await getAllDiaries(userId);
-    const monthDiaries = allDiaries.data.diaries.filter((diary) => {
-      const diaryDate = new Date(diary.mdiaDate);
-      return diaryDate.getFullYear() === year && diaryDate.getMonth() + 1 === month;
-    });
-
-    return {
-      success: true,
-      data: {
-        diaries: monthDiaries,
-        totalCount: monthDiaries.length,
-      },
-    };
-  } catch (error) {
-    console.error('월별 일기 조회 중 오류:', error);
-    throw new Error('월별 일기를 불러올 수 없습니다.');
-  }
-};
-
-/**
- * 일기 통계 조회
- * @param {string} userId - 사용자 ID
- * @param {number} year - 연도
- * @param {number} month - 월 (1-12)
- * @returns {Promise<Object>} - 통계 데이터
- */
-const getDiaryStats = async (userId, year, month) => {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  try {
-    const monthData = await getDiariesByMonth(userId, year, month);
-    const diaries = monthData.data.diaries;
-
-    // 해당 월의 총 일수
-    const daysInMonth = new Date(year, month, 0).getDate();
-
-    // 작성률 계산
-    const writtenDays = diaries.length;
-    const writeRate = Math.round((writtenDays / daysInMonth) * 100);
-
-    // 평균 일기 길이 계산
-    const averageLength =
-      diaries.length > 0
-        ? Math.round(
-            diaries.reduce((sum, diary) => sum + (diary.mdiaContent?.length || 0), 0) /
-              diaries.length,
-          )
-        : 0;
-
-    return {
-      success: true,
-      data: {
-        year,
-        month,
-        totalDays: daysInMonth,
-        writtenDays,
-        writeRate,
-        averageLength,
-        longestEntry:
-          diaries.length > 0 ? Math.max(...diaries.map((d) => d.mdiaContent?.length || 0)) : 0,
-        shortestEntry:
-          diaries.length > 0 ? Math.min(...diaries.map((d) => d.mdiaContent?.length || 0)) : 0,
-      },
-    };
-  } catch (error) {
-    console.error('일기 통계 조회 중 오류:', error);
-    throw new Error('일기 통계를 불러올 수 없습니다.');
-  }
-};
-
-/**
- * 일기 검색
- * @param {string} userId - 사용자 ID
- * @param {string} keyword - 검색 키워드
- * @returns {Promise<Object>} - 검색 결과
- */
-const searchDiaries = async (userId, keyword) => {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-
-  try {
-    if (!keyword || keyword.trim().length === 0) {
-      throw new Error('검색 키워드를 입력해주세요.');
-    }
-
-    const allDiaries = await getAllDiaries(userId);
-    const searchResults = allDiaries.data.diaries.filter((diary) => {
-      return diary.mdiaContent?.toLowerCase().includes(keyword.toLowerCase());
-    });
-
-    return {
-      success: true,
-      data: {
-        diaries: searchResults,
-        totalCount: searchResults.length,
-        keyword: keyword.trim(),
-      },
-    };
-  } catch (error) {
-    console.error('일기 검색 중 오류:', error);
-    throw error;
-  }
-};
-
 const DIARY_API = {
-  // 기본 CRUD
+  // 기본 CRUD (필수 기능만) - userId 파라미터 제거
   getDiaryByDate,
   saveDiary,
   deleteDiary,
 
   // 목록 조회
   getAllDiaries,
-  getDiariesByMonth,
 
-  // 통계 및 검색
-  getDiaryStats,
-  searchDiaries,
-
-  // 유틸리티
+  // 유틸리티 (필요)
   formatDateKey,
+  getCurrentUser,
 };
 
 export default DIARY_API;
