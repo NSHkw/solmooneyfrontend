@@ -5,7 +5,7 @@
 
 const SERVER_URL = import.meta.env.VITE_API_BASE_URL;
 
-// ✅ 로그인 API
+// ✅ 로그인 API (수정됨 - 토큰 대신 userId 저장)
 const login = async (credentials) => {
   const logindata = {
     loginId: credentials.id,
@@ -38,9 +38,11 @@ const login = async (credentials) => {
         success: true,
         message: '로그인 성공',
         data: {
-          token: result.token,
+          // 🔥 토큰 대신 userId를 저장 (세션 정보도 함께)
+          userId: result.userInfo.mmemId || result.userInfo.id || result.userInfo.regId,
+          sessionInfo: result.token || null, // 세션 정보 (선택사항)
           user: {
-            id: result.userInfo.mmemId || result.userInfo.id,
+            loginId: result.userInfo.mmemId || result.userInfo.id || result.userInfo.regId,
             nick: result.userInfo.mmemNick || result.userInfo.nick,
             ppnt: result.userInfo.mmemPnt || result.userInfo.ppnt || 0,
             regd: result.userInfo.registeredDate || result.userInfo.regd,
@@ -102,29 +104,40 @@ const register = async (userData) => {
   }
 };
 
-// ✅ 토큰 검증 API (기본 구조만)
-const verifyToken = async (token) => {
+// ✅ 사용자 인증 확인 API (토큰 대신 userId 사용)
+const verifyUser = async (userId) => {
   try {
+    console.log('🔍 사용자 검증 시작:', userId);
+
     const response = await fetch(`${SERVER_URL}/do.logincheck`, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
       },
-      credentials: 'include',
+      credentials: 'include', // 쿠키 기반 세션 사용
+      body: JSON.stringify({
+        userId: userId, // userId만 전송
+        // 또는 백엔드가 원하는 필드명에 맞춰서
+        loginId: userId,
+      }),
     });
 
+    console.log('📡 사용자 검증 응답 상태:', response.status);
+
     if (!response.ok) {
-      throw new Error('토큰이 유효하지 않습니다.');
+      const errorText = await response.text();
+      console.error('❌ 사용자 검증 에러 응답:', errorText);
+      throw new Error('사용자 인증이 유효하지 않습니다.');
     }
 
     const result = await response.json();
+    console.log('✅ 사용자 검증 성공:', result);
 
     return {
       success: true,
       data: {
         user: {
-          id: result.userInfo.mmemId,
+          id: result.userInfo.mmemId || result.userInfo.regId || result.userInfo.id,
           nick: result.userInfo.mmemNick,
           points: result.userInfo.mmemPnt || 0,
           registeredDate: result.userInfo.registeredDate,
@@ -134,7 +147,8 @@ const verifyToken = async (token) => {
       },
     };
   } catch (error) {
-    throw new Error(error.message || '토큰 검증에 실패했습니다.');
+    console.error('❌ 사용자 검증 실패:', error);
+    throw new Error(error.message || '사용자 검증에 실패했습니다.');
   }
 };
 
@@ -423,11 +437,37 @@ const verifyPassword = async (userId, password) => {
   }
 };
 
+// 🔥 개발용 임시 검증 함수
+const verifyUserDev = async (userId) => {
+  console.log('🚧 개발모드: 사용자 검증 건너뛰기, userId:', userId);
+
+  // 로컬스토리지의 유저 데이터 확인
+  const userData = localStorage.getItem('userData');
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      // userId가 일치하는지 확인
+      if (user.loginId === userId || user.id === userId) {
+        return {
+          success: true,
+          data: { user },
+        };
+      } else {
+        throw new Error('사용자 ID가 일치하지 않습니다.');
+      }
+    } catch (e) {
+      throw new Error('저장된 유저 데이터가 잘못되었습니다.');
+    }
+  }
+
+  throw new Error('유저 데이터가 없습니다.');
+};
+
 // ✅ API 객체 export
 const USER_API = {
   login,
   register,
-  verifyToken,
+  verifyUser,
   sendVerificationEmail,
   verifyEmailCode,
   checkIdDuplicate,
@@ -437,6 +477,7 @@ const USER_API = {
   getUserInfo,
   logout,
   verifyPassword,
+  verifyUserDev,
 };
 
 export default USER_API;
