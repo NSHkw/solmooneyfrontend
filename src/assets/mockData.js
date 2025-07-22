@@ -254,6 +254,7 @@ const mockExpenseData = [
     mexpRptdd: new Date('2025-06-25'), // 원래 예정일
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',
+    mcatId: 1,
   },
   {
     mexpId: 102,

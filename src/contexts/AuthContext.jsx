@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const result = await USER_API.login(credentials);
-      console.log('authcontext');
+      console.log('result', result);
 
       if (result.success) {
         // JWT 토큰을 localStorage에 저장

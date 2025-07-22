@@ -6,9 +6,10 @@ import useAuth from '../contexts/useAuth.jsx';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../route/routes';
 import logo_nuki from '../img/logo_nuki.png';
-import API from '../services/back/userApi.js';
+import API from '../services/mock/mockUser.js';
 import S from '../styles/loginPage.style.js';
 
+// import API from '../services/back/userApi.js';
 function LoginPage() {
   const [currentForm, setCurrentForm] = useState('login'); // 'login', 'register', 'reset'
   const [isAnimating, setIsAnimating] = useState(false);
@@ -254,7 +255,6 @@ function LoginPage() {
       password: formData.password,
       nickname: formData.nickname,
       birthDate: formData.birthDate,
-      email: formData.email,
     });
 
     if (result.success) {
