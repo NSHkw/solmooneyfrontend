@@ -23,7 +23,7 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, checkTokenExpiry } = useAuth(); // 인증 상태 가져오기
+  const { user, logout, checkUserAuth } = useAuth(); // 인증 상태 가져오기
 
   const [hasNotification, setHasNotification] = useState(true);
 
@@ -39,7 +39,7 @@ const Sidebar = ({
 
   const handleMenuClick = (path, itemId) => {
     // 메뉴 클릭 시 토큰 체크
-    if (!checkTokenExpiry()) {
+    if (!checkUserAuth()) {
       return; // 토큰이 만료되면 ProtectedRoute에서 자동 처리
     }
 
@@ -51,13 +51,13 @@ const Sidebar = ({
   };
 
   const handleRootClick = () => {
-    if (checkTokenExpiry()) {
+    if (checkUserAuth()) {
       navigate(ROUTES.ROOT);
     }
   };
 
   const handleUserClick = () => {
-    if (checkTokenExpiry()) {
+    if (checkUserAuth()) {
       navigate(ROUTES.USER);
     }
   };

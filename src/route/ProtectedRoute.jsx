@@ -1,4 +1,4 @@
-// src/components/ProtectedRoute.jsx
+// src/route/ProtectedRoute.jsx
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import useAuth from '../contexts/useAuth.jsx';
@@ -6,15 +6,15 @@ import { toast } from 'react-toastify';
 import { ROUTES } from '../route/routes';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, checkTokenExpiry, loading } = useAuth();
+  const { isAuthenticated, checkUserAuth, loading } = useAuth(); // 🔥 checkTokenExpiry 대신 checkUserAuth
   const location = useLocation();
 
-  // 페이지 이동할 때마다 토큰 체크
+  // 🔥 페이지 이동할 때마다 사용자 인증 체크
   useEffect(() => {
-    if (isAuthenticated && !checkTokenExpiry()) {
+    if (isAuthenticated && !checkUserAuth()) {
       toast.error('로그인이 만료되었습니다. 다시 로그인해주세요.');
     }
-  }, [isAuthenticated, checkTokenExpiry, location.pathname]);
+  }, [isAuthenticated, checkUserAuth, location.pathname]);
 
   // 로딩 중일 때
   if (loading) {
