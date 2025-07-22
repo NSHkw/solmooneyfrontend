@@ -10,7 +10,7 @@ const login = async (credentials) => {
 
   const { id, password } = credentials;
 
-  const user = MOCKDATA.mockUserData.find((u) => u.id === id && u.pw === password);
+  const user = MOCKDATA.mockUserData.find((u) => u.mmemId === id && u.mmemPw === password);
 
   if (!user) {
     console.log('로그인 에러가 났다');
