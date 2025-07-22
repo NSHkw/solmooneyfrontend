@@ -11,8 +11,12 @@ const ProtectedRoute = ({ children }) => {
 
   // 🔥 페이지 이동할 때마다 사용자 인증 체크
   useEffect(() => {
-    if (isAuthenticated && !checkUserAuth()) {
-      toast.error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+    if (isAuthenticated) {
+      checkUserAuth().then((isValid) => {
+        if (!isValid) {
+          toast.error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        }
+      });
     }
   }, [isAuthenticated, checkUserAuth, location.pathname]);
 
