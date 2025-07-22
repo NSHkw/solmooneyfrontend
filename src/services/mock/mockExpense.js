@@ -2,16 +2,39 @@
 import MOCKDATA from '../../assets/mockData.js';
 
 /**
+ * 로그인한 사용자 정보 가져오기
+ */
+const getCurrentUser = () => {
+  try {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const user = JSON.parse(userData);
+      return user.mmemId || user.userId || user.id; // 여러 키 형태 지원
+    }
+    return 'user001'; // 기본값 (로그인 정보가 없을 때)
+  } catch (error) {
+    console.error('사용자 정보를 불러올 수 없습니다:', error);
+    return 'user001'; // 에러 시 기본값
+  }
+};
+
+/**
  * 특정 날짜의 소비 내역을 가져오는 Mock API
  * @param {Date} date - 조회할 날짜
- * @param {string} userId - 사용자 ID (기본값: 'user001')
+ * @param {string} userId - 사용자 ID (선택사항)
  * @returns {Object} - 해당 날짜의 수입/지출 데이터와 카테고리별 집계
  */
-const getExpensesByDate = (date, userId = 'user001') => {
+const getExpensesByDate = (date, userId = null) => {
+  const currentUserId = userId || getCurrentUser();
   const targetDate = new Date(date);
 
+  // 해당 날짜의 완료된 거래만 필터링
   const dayExpenses = MOCKDATA.mockExpenseData.filter((expense) => {
-    if (!expense.mexpDt || expense.mexpMmemId !== userId || expense.mexpStatus !== 'COMPLETED') {
+    if (
+      !expense.mexpDt ||
+      expense.mexpMmemId !== currentUserId ||
+      expense.mexpStatus !== 'COMPLETED'
+    ) {
       return false;
     }
 
@@ -54,13 +77,14 @@ const getExpensesByDate = (date, userId = 'user001') => {
     });
   });
 
+  // 차트용 데이터 생성
   const chartData = Object.entries(categoryData).map(([name, data]) => ({
     name,
     value: data.amount,
     color: data.color,
   }));
 
-  // 날짜 출력용 문자열도 로컬 기준으로 포맷팅
+  // 날짜 출력용 문자열 포맷팅
   const dateString = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
 
   return {
@@ -83,24 +107,33 @@ const getExpensesByDate = (date, userId = 'user001') => {
  * 특정 월의 모든 날짜별 소비 요약 데이터 가져오기
  * @param {number} year - 연도
  * @param {number} month - 월 (1-12)
- * @param {string} userId - 사용자 ID
- * @returns {Array} - 월별 일자별 소비 요약 (실제 데이터만)
+ * @param {string} userId - 사용자 ID (선택사항)
+ * @returns {Array} - 월별 일자별 소비 요약
  */
-const getMonthlyExpenseSummary = (year, month, userId = 'user001') => {
+const getMonthlyExpenseSummary = (year, month, userId = null) => {
+  const currentUserId = userId || getCurrentUser();
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 0);
   const summary = [];
 
-  for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
-    const dayData = getExpensesByDate(new Date(d), userId);
-    // 샘플 데이터 생성 로직 제거 - 실제 데이터만 사용
+  for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const dayData = getExpensesByDate(new Date(d), currentUserId);
     summary.push(dayData);
   }
 
   return summary;
 };
 
+/**
+ * 현재 사용자 ID 가져오기
+ */
+const getCurrentUserId = () => {
+  return getCurrentUser();
+};
+
+// Export API 객체
 const EXPENSE_API = {
+  getCurrentUserId,
   getExpensesByDate,
   getMonthlyExpenseSummary,
 };
