@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useReducer } from 'react';
 import { toast } from 'react-toastify';
-import USER_API from '../services/back/userApi.js';
+import USER_API from '../services/mock/mockUser.js';
 // import MOCKDATA from '../assets/mockData.js'; // 없어도 됨(콘솔로그 한 거)
 
 // 실제 백엔드 연결시
