@@ -1,4 +1,4 @@
-// src/api/mockExpense.js
+// src/services/mock/mockExpense.js
 import MOCKDATA from '../../assets/mockData.js';
 
 /**
@@ -13,9 +13,13 @@ const getExpensesByDate = (date, userId = 'user001') => {
 
   // 해당 날짜의 지출 데이터 필터링
   const dayExpenses = MOCKDATA.mockExpenseData.filter((expense) => {
+    // Date 객체를 문자열로 변환해서 비교
+    const expenseDate = expense.mexpDt
+      ? new Date(expense.mexpDt).toISOString().split('T')[0]
+      : null;
     return (
       expense.mexpMmemId === userId &&
-      expense.mexpDt === dateString &&
+      expenseDate === dateString &&
       expense.mexpStatus === 'COMPLETED'
     );
   });
@@ -74,73 +78,11 @@ const getExpensesByDate = (date, userId = 'user001') => {
 };
 
 /**
- * 날짜별 더미 데이터 생성 (데이터가 없는 날짜를 위한 샘플 데이터)
- * @param {Date} date - 날짜
- * @returns {Object} - 더미 소비 데이터
- */
-const generateSampleDataForDate = (date) => {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
-
-  // 날짜 기반으로 다양한 샘플 데이터 생성
-  const sampleData = [
-    {
-      income: 0,
-      totalExpense: 45000,
-      chartData: [
-        { name: '식비', value: 25000, color: '#FF9F40' },
-        { name: '교통비', value: 12000, color: '#4BC0C0' },
-        { name: '기타', value: 8000, color: '#9C27B0' },
-      ],
-    },
-    {
-      income: 0,
-      totalExpense: 32000,
-      chartData: [
-        { name: '쇼핑', value: 20000, color: '#8BC34A' },
-        { name: '식비', value: 12000, color: '#FF9F40' },
-      ],
-    },
-    {
-      income: 0,
-      totalExpense: 18000,
-      chartData: [
-        { name: '식비', value: 15000, color: '#FF9F40' },
-        { name: '기타', value: 3000, color: '#9C27B0' },
-      ],
-    },
-    {
-      income: 3500000,
-      totalExpense: 0,
-      chartData: [],
-    },
-    {
-      income: 0,
-      totalExpense: 67000,
-      chartData: [
-        { name: '엔터테인먼트', value: 17000, color: '#FF6384' },
-        { name: '식비', value: 35000, color: '#FF9F40' },
-        { name: '교통비', value: 15000, color: '#4BC0C0' },
-      ],
-    },
-  ];
-
-  // 날짜 기반으로 샘플 데이터 선택
-  const index = (day + month) % sampleData.length;
-  return {
-    date: date.toISOString().split('T')[0],
-    ...sampleData[index],
-    expenses: [],
-    categoryData: {},
-  };
-};
-
-/**
  * 특정 월의 모든 날짜별 소비 요약 데이터 가져오기
  * @param {number} year - 연도
  * @param {number} month - 월 (1-12)
  * @param {string} userId - 사용자 ID
- * @returns {Array} - 월별 일자별 소비 요약
+ * @returns {Array} - 월별 일자별 소비 요약 (실제 데이터만)
  */
 const getMonthlyExpenseSummary = (year, month, userId = 'user001') => {
   const startDate = new Date(year, month - 1, 1);
@@ -149,19 +91,16 @@ const getMonthlyExpenseSummary = (year, month, userId = 'user001') => {
 
   for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
     const dayData = getExpensesByDate(new Date(d), userId);
-
-    // 실제 데이터가 없으면 샘플 데이터 사용
-    if (dayData.totalExpense === 0 && dayData.income === 0) {
-      const sampleData = generateSampleDataForDate(new Date(d));
-      summary.push(sampleData);
-    } else {
-      summary.push(dayData);
-    }
+    // 샘플 데이터 생성 로직 제거 - 실제 데이터만 사용
+    summary.push(dayData);
   }
 
   return summary;
 };
 
-const EXPENSE_API = { getExpensesByDate, generateSampleDataForDate, getMonthlyExpenseSummary };
+const EXPENSE_API = {
+  getExpensesByDate,
+  getMonthlyExpenseSummary,
+};
 
 export default EXPENSE_API;
