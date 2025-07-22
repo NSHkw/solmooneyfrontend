@@ -369,7 +369,7 @@ const getUserInfo = async (userId) => {
   }
 };
 
-// ✅ 로그아웃 API (백엔드 완성 후 구현 예정)
+// ✅ 로그아웃 API (수정됨)
 const logout = async () => {
   try {
     const response = await fetch(`${SERVER_URL}/logout`, {
@@ -380,12 +380,11 @@ const logout = async () => {
       credentials: 'include',
     });
 
-    // 로컬 스토리지 토큰 삭제
-    localStorage.removeItem('token');
+    // 🔥 로컬 스토리지 userId 삭제 (token → userId로 수정)
+    localStorage.removeItem('userId'); // ✅ 수정됨
     localStorage.removeItem('userData');
 
     if (!response.ok) {
-      // 서버 에러여도 로컬 정리는 완료됨
       return {
         success: true,
         message: '로그아웃되었습니다.',
@@ -399,8 +398,8 @@ const logout = async () => {
       message: result.message || '로그아웃되었습니다.',
     };
   } catch (error) {
-    // 에러가 발생해도 로컬 토큰은 삭제됨
-    localStorage.removeItem('token');
+    // 🔥 에러가 발생해도 로컬 userId는 삭제됨 (token → userId로 수정)
+    localStorage.removeItem('userId'); // ✅ 수정됨
     localStorage.removeItem('userData');
 
     return {

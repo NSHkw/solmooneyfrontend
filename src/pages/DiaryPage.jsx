@@ -5,9 +5,12 @@ import 'react-calendar/dist/Calendar.css';
 import '../css/DiaryPage.css';
 import diaryImg from '../img/pencil_mooney.png';
 import CategoryChart from '../components/CategoryChart';
-import EXPENSE_API from './../services/mock/mockExpense';
-import DIARY_API from './../services/mock/mockDiary';
+// import EXPENSE_API from './../services/back/expenseApi.js';
+// import DIARY_API from './../services/back/diaryApi.js';
 import AuthContext from '../contexts/AuthContext.jsx';
+
+import EXPENSE_API from './../services/mock/mockExpense.js';
+import DIARY_API from './../services/mock/mockDiary.js';
 
 const DiaryPage = () => {
   const [date, setDate] = useState(new Date());
@@ -52,12 +55,12 @@ const DiaryPage = () => {
 
   // 소비 내역 로드 함수
   const loadExpenseData = () => {
-    // user가 있을 때만 expense 데이터 로드
-    if (user?.id) {
-      const dayExpenseData = EXPENSE_API.getExpensesByDate(date, user.id);
+    try {
+      // userId를 전달하지 않으면 자동으로 현재 로그인한 사용자 사용
+      const dayExpenseData = EXPENSE_API.getExpensesByDate(date);
       setExpenseData(dayExpenseData);
-    } else {
-      // 로그인하지 않은 경우 빈 데이터
+    } catch (error) {
+      console.error('지출 데이터 로드 오류:', error);
       setExpenseData({
         income: 0,
         totalExpense: 0,

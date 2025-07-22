@@ -37,10 +37,11 @@ const Sidebar = ({
     { id: 'subscription', label: '구독', icon: pencilImg, path: ROUTES.SUBSCRIPTION },
   ];
 
-  const handleMenuClick = (path, itemId) => {
-    // 메뉴 클릭 시 토큰 체크
-    if (!checkUserAuth()) {
-      return; // 토큰이 만료되면 ProtectedRoute에서 자동 처리
+  const handleMenuClick = async (path, itemId) => {
+    // 🔥 비동기 처리로 수정
+    const isValid = await checkUserAuth();
+    if (!isValid) {
+      return; // 인증 실패 시 ProtectedRoute에서 자동 처리
     }
 
     if (itemId === 'notify') {
@@ -50,14 +51,18 @@ const Sidebar = ({
     }
   };
 
-  const handleRootClick = () => {
-    if (checkUserAuth()) {
+  const handleRootClick = async () => {
+    // 🔥 비동기 처리로 수정
+    const isValid = await checkUserAuth();
+    if (isValid) {
       navigate(ROUTES.ROOT);
     }
   };
 
-  const handleUserClick = () => {
-    if (checkUserAuth()) {
+  const handleUserClick = async () => {
+    // 🔥 비동기 처리로 수정
+    const isValid = await checkUserAuth();
+    if (isValid) {
       navigate(ROUTES.USER);
     }
   };
