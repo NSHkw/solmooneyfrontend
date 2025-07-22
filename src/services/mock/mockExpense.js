@@ -9,18 +9,18 @@ import MOCKDATA from '../../assets/mockData.js';
  */
 const getExpensesByDate = (date, userId = 'user001') => {
   const targetDate = new Date(date);
-  const dateString = targetDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
 
-  // 해당 날짜의 지출 데이터 필터링
   const dayExpenses = MOCKDATA.mockExpenseData.filter((expense) => {
-    // Date 객체를 문자열로 변환해서 비교
-    const expenseDate = expense.mexpDt
-      ? new Date(expense.mexpDt).toISOString().split('T')[0]
-      : null;
+    if (!expense.mexpDt || expense.mexpMmemId !== userId || expense.mexpStatus !== 'COMPLETED') {
+      return false;
+    }
+
+    const expenseDate = new Date(expense.mexpDt);
+
     return (
-      expense.mexpMmemId === userId &&
-      expenseDate === dateString &&
-      expense.mexpStatus === 'COMPLETED'
+      expenseDate.getFullYear() === targetDate.getFullYear() &&
+      expenseDate.getMonth() === targetDate.getMonth() &&
+      expenseDate.getDate() === targetDate.getDate()
     );
   });
 
@@ -54,12 +54,14 @@ const getExpensesByDate = (date, userId = 'user001') => {
     });
   });
 
-  // 차트용 데이터 변환
   const chartData = Object.entries(categoryData).map(([name, data]) => ({
     name,
     value: data.amount,
     color: data.color,
   }));
+
+  // 날짜 출력용 문자열도 로컬 기준으로 포맷팅
+  const dateString = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
 
   return {
     date: dateString,

@@ -104,8 +104,6 @@ const mockCategory = [
   { mcatId: 10, mcatName: '교육', mcatColor: '#4ECDC4' },
 ];
 
-// 수입/지출 데이터 (MOONEY_EXPENSE 테이블 구조에 정확히 맞춤)
-// 수입/지출 데이터 (MOONEY_EXPENSE 테이블 구조에 정확히 맞춤)
 const mockExpenseData = [
   // === 구독 예정 (PENDING) - 현재 달 예정 ===
   {

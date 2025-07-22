@@ -1,5 +1,5 @@
 // src/pages/DiaryPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../css/DiaryPage.css';
@@ -7,6 +7,7 @@ import diaryImg from '../img/pencil_mooney.png';
 import CategoryChart from '../components/CategoryChart';
 import EXPENSE_API from './../services/mock/mockExpense';
 import DIARY_API from './../services/mock/mockDiary';
+import AuthContext from '../contexts/AuthContext.jsx';
 
 const DiaryPage = () => {
   const [date, setDate] = useState(new Date());
@@ -14,6 +15,7 @@ const DiaryPage = () => {
   const [diaryText, setDiaryText] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user, isAuthenticated } = useContext(AuthContext);
 
   // 소비 내역 상태
   const [expenseData, setExpenseData] = useState({
@@ -22,9 +24,6 @@ const DiaryPage = () => {
     chartData: [],
   });
 
-  // 현재 사용자 ID (실제로는 인증 컨텍스트에서 가져와야 함)
-  const currentUserId = 'user001';
-
   const formatDisplayDate = (d) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
 
   // 금액 포맷팅 함수
@@ -32,11 +31,11 @@ const DiaryPage = () => {
     return new Intl.NumberFormat('ko-KR').format(amount);
   };
 
-  // 일기 데이터 로드 함수
+  // 일기 데이터 로드 함수 - userId 파라미터 제거 (localStorage에서 자동으로 가져옴)
   const loadDiaryData = async () => {
     setIsLoading(true);
     try {
-      const diaryResult = await DIARY_API.getDiaryByDate(currentUserId, date);
+      const diaryResult = await DIARY_API.getDiaryByDate(date);
 
       if (diaryResult.data) {
         setDiaryText(diaryResult.data.text || '');
@@ -53,20 +52,29 @@ const DiaryPage = () => {
 
   // 소비 내역 로드 함수
   const loadExpenseData = () => {
-    const dayExpenseData = EXPENSE_API.getExpensesByDate(date, currentUserId);
-
-    // 샘플 데이터 생성 로직 완전 삭제
-    // 실제 mockData에 있는 데이터만 사용
-    setExpenseData(dayExpenseData);
+    // user가 있을 때만 expense 데이터 로드
+    if (user?.id) {
+      const dayExpenseData = EXPENSE_API.getExpensesByDate(date, user.id);
+      setExpenseData(dayExpenseData);
+    } else {
+      // 로그인하지 않은 경우 빈 데이터
+      setExpenseData({
+        income: 0,
+        totalExpense: 0,
+        chartData: [],
+      });
+    }
   };
 
   // 날짜가 바뀔 때마다 데이터 로드
   useEffect(() => {
-    loadDiaryData();
-    loadExpenseData(); // 이제 실제 데이터만 로드
-  }, [date]);
+    if (isAuthenticated && user) {
+      loadDiaryData();
+      loadExpenseData();
+    }
+  }, [date, isAuthenticated, user]);
 
-  // 일기 저장 함수
+  // 일기 저장 함수 - userId 파라미터 제거
   const saveDiary = async () => {
     if (!diaryText.trim()) {
       alert('일기 내용을 입력해주세요.');
@@ -75,7 +83,7 @@ const DiaryPage = () => {
 
     setIsLoading(true);
     try {
-      await DIARY_API.saveDiary(currentUserId, date, diaryText);
+      await DIARY_API.saveDiary(date, diaryText);
       setEditMode(false);
       await loadDiaryData(); // 저장 후 다시 로드
       console.log('일기 저장 완료');
@@ -87,7 +95,7 @@ const DiaryPage = () => {
     }
   };
 
-  // 일기 삭제 함수
+  // 일기 삭제 함수 - userId 파라미터 제거
   const deleteDiary = async () => {
     if (!window.confirm('정말로 이 일기를 삭제하시겠습니까?')) {
       return;
@@ -95,7 +103,7 @@ const DiaryPage = () => {
 
     setIsLoading(true);
     try {
-      await DIARY_API.deleteDiary(currentUserId, date);
+      await DIARY_API.deleteDiary(date);
       await loadDiaryData(); // 삭제 후 다시 로드
       console.log('일기 삭제 완료');
     } catch (error) {
@@ -105,6 +113,24 @@ const DiaryPage = () => {
       setIsLoading(false);
     }
   };
+
+  // 로그인하지 않은 경우
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="diary-container">
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            color: '#666',
+            fontSize: '18px',
+          }}
+        >
+          일기를 사용하려면 로그인이 필요합니다.
+        </div>
+      </div>
+    );
+  }
 
   // 일기 내용이 있는지 확인하여 버튼 텍스트 결정
   const getButtonText = () => {
