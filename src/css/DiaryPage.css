@@ -1,4 +1,5 @@
 /* ✅ Mooney 메인 페이지와 통일된 DiaryPage 스타일 */
+/* src/css/DiaryPage.css */
 
 body {
   background: #f8f9fa;
@@ -19,7 +20,8 @@ body {
   height: calc(100vh - 140px);
 }
 
-.left-panel, .right-panel {
+.left-panel,
+.right-panel {
   width: 48%;
   display: flex;
   flex-direction: column;
