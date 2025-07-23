@@ -463,7 +463,7 @@ const verifyUserDev = async (userId) => {
 };
 
 // ✅ API 객체 export
-const USER_API = {
+const BACK_USER_API = {
   login,
   register,
   verifyUser,
@@ -479,4 +479,4 @@ const USER_API = {
   verifyUserDev,
 };
 
-export default USER_API;
+export default BACK_USER_API;

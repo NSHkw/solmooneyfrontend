@@ -1,3 +1,3 @@
-const CHALLENGE_API = {};
+const MOCK_CHALLENGE_API = {};
 
-export default CHALLENGE_API;
+export default MOCK_CHALLENGE_API;

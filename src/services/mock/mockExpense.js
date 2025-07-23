@@ -132,10 +132,10 @@ const getCurrentUserId = () => {
 };
 
 // Export API 객체
-const EXPENSE_API = {
+const MOCK_EXPENSE_API = {
   getCurrentUserId,
   getExpensesByDate,
   getMonthlyExpenseSummary,
 };
 
-export default EXPENSE_API;
+export default MOCK_EXPENSE_API;

@@ -243,7 +243,7 @@ const getAllDiaries = async () => {
   }
 };
 
-const DIARY_API = {
+const MOCK_DIARY_API = {
   // 기본 CRUD (필수 기능만) - userId 파라미터 제거
   getDiaryByDate,
   saveDiary,
@@ -257,4 +257,4 @@ const DIARY_API = {
   getCurrentUser,
 };
 
-export default DIARY_API;
+export default MOCK_DIARY_API;

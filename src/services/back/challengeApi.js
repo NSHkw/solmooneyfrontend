@@ -1,3 +1,3 @@
-const CHALLENGE_API = {};
+const BACK_CHALLENGE_API = {};
 
-export default CHALLENGE_API;
+export default BACK_CHALLENGE_API;

@@ -380,7 +380,7 @@ const getUserInfo = async (userId) => {
   };
 };
 
-const USER_API = {
+const MOCK_USER_API = {
   login,
   register,
   verifyUser, // 🔥 세션 기반 검증
@@ -396,4 +396,4 @@ const USER_API = {
   verifyPassword,
 };
 
-export default USER_API;
+export default MOCK_USER_API;

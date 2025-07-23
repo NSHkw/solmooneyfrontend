@@ -214,7 +214,7 @@ const getAllDiaries = async () => {
   }
 };
 
-const DIARY_API = {
+const BACK_DIARY_API = {
   // 기본 CRUD (필수 기능만)
   getDiaryByDate,
   saveDiary,
@@ -228,4 +228,4 @@ const DIARY_API = {
   getCurrentUser,
 };
 
-export default DIARY_API;
+export default BACK_DIARY_API;
