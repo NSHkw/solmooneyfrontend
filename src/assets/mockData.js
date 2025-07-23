@@ -1,58 +1,58 @@
 // src/assets/mockData.js
 import { FaBell, FaTrophy, FaWallet, FaBookOpen } from 'react-icons/fa';
-// import { ROUTES } from '../constants/routes';
+import { ROUTES } from '../route/routes';
 
-// // 알림 데이터 (MOONEY_NOTIFICATION 테이블 구조에 맞춤)
-// const mockNotificationsData = [
-//   {
-//     mnofId: 1,
-//     mnofMmemId: 'testuser123',
-//     mnofContent: '챌린지를 완료했습니다! 포인트를 획득하세요.',
-//     mnofType: 'challenge',
-//     mnofDt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
-//     mnofReadYn: 'N',
-//     // 프론트엔드 표시용 추가 필드 (실제 DB에는 없음)
-//     icon: FaTrophy,
-//     title: '챌린지 완료',
-//     path: ROUTES.CHALLENGE,
-//   },
-//   {
-//     mnofId: 2,
-//     mnofMmemId: 'testuser123',
-//     mnofContent: '이번 달 예산의 80%를 사용했습니다.',
-//     mnofType: 'expense',
-//     mnofDt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4시간 전
-//     mnofReadYn: 'Y',
-//     // 프론트엔드 표시용 추가 필드
-//     icon: FaWallet,
-//     title: '월 예산 80% 사용',
-//     path: ROUTES.ACCOUNT_BOOK,
-//   },
-//   {
-//     mnofId: 3,
-//     mnofMmemId: 'testuser123',
-//     mnofContent: '어제 소비에 대한 일기를 작성해보세요.',
-//     mnofType: 'diary',
-//     mnofDt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1일 전
-//     mnofReadYn: 'N',
-//     // 프론트엔드 표시용 추가 필드
-//     icon: FaBookOpen,
-//     title: '소비 일기 작성 알림',
-//     path: ROUTES.DIARY,
-//   },
-//   {
-//     mnofId: 4,
-//     mnofMmemId: 'testuser123',
-//     mnofContent: '가계부 차트 기능이 새롭게 추가되었습니다.',
-//     mnofType: 'system',
-//     mnofDt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
-//     mnofReadYn: 'Y',
-//     // 프론트엔드 표시용 추가 필드
-//     icon: FaBell,
-//     title: '새로운 기능 업데이트',
-//     path: '/chart',
-//   },
-// ];
+// 알림 데이터 (MOONEY_NOTIFICATION 테이블 구조에 맞춤)
+const mockNotificationsData = [
+  {
+    mnofId: 1,
+    mnofMmemId: 'testuser123',
+    mnofContent: '챌린지를 완료했습니다! 포인트를 획득하세요.',
+    mnofType: 'challenge',
+    mnofDt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+    mnofReadYn: 'N',
+    // 프론트엔드 표시용 추가 필드 (실제 DB에는 없음)
+    icon: FaTrophy,
+    title: '챌린지 완료',
+    path: ROUTES.CHALLENGE,
+  },
+  {
+    mnofId: 2,
+    mnofMmemId: 'testuser123',
+    mnofContent: '이번 달 예산의 80%를 사용했습니다.',
+    mnofType: 'expense',
+    mnofDt: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4시간 전
+    mnofReadYn: 'Y',
+    // 프론트엔드 표시용 추가 필드
+    icon: FaWallet,
+    title: '월 예산 80% 사용',
+    path: ROUTES.ACCOUNT_BOOK,
+  },
+  {
+    mnofId: 3,
+    mnofMmemId: 'testuser123',
+    mnofContent: '어제 소비에 대한 일기를 작성해보세요.',
+    mnofType: 'diary',
+    mnofDt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1일 전
+    mnofReadYn: 'N',
+    // 프론트엔드 표시용 추가 필드
+    icon: FaBookOpen,
+    title: '소비 일기 작성 알림',
+    path: ROUTES.DIARY,
+  },
+  {
+    mnofId: 4,
+    mnofMmemId: 'testuser123',
+    mnofContent: '가계부 차트 기능이 새롭게 추가되었습니다.',
+    mnofType: 'system',
+    mnofDt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
+    mnofReadYn: 'Y',
+    // 프론트엔드 표시용 추가 필드
+    icon: FaBell,
+    title: '새로운 기능 업데이트',
+    path: '/chart',
+  },
+];
 
 // 사용자 데이터 (MOONEY_MEMBER 테이블 구조에 맞춤)
 const mockUserData = [
@@ -688,6 +688,7 @@ const MOCKDATA = {
   mockExpenseData,
   mockDiaryData,
   mockChallengeData,
+  mockNotificationsData,
 };
 
 export default MOCKDATA;
