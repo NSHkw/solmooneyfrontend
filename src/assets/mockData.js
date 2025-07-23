@@ -88,6 +88,7 @@ const mockUserData = [
     mmemPw: '1234',
     mmemNick: 'admin',
     mmemPphoto: null,
+    mmemRegd: new Date('1999-01-01'),
     mmemBir: new Date('2020-05-05'),
     mmemPnt: 987654,
   },

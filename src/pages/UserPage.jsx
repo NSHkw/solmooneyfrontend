@@ -13,9 +13,6 @@ function UserPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 카테고리 추가 모달 상태
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-
   // 컴포넌트 마운트 시 사용자 정보 새로고침
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -54,22 +51,6 @@ function UserPage() {
 
   const goToHome = () => {
     navigate(ROUTES.ROOT);
-  };
-
-  // 카테고리 모달 토글
-  const toggleCategoryModal = () => {
-    setShowCategoryModal(!showCategoryModal);
-  };
-
-  // 카테고리 추가 기능 (Mock)
-  const handleAddCategory = () => {
-    const categoryName = prompt('추가할 카테고리 이름을 입력하세요:');
-    if (categoryName && categoryName.trim()) {
-      alert(`"${categoryName}" 카테고리가 추가되었습니다! (실제 환경에서는 서버에 저장됩니다)`);
-      setShowCategoryModal(false);
-    } else if (categoryName !== null) {
-      alert('카테고리 이름을 입력해주세요.');
-    }
   };
 
   // 포인트 사용 기능
@@ -183,12 +164,6 @@ function UserPage() {
           </S.PointCard>
         </S.PointSection>
 
-        {/* 카테고리 관리 섹션 */}
-        <S.Section>
-          <S.SectionTitle>카테고리 관리</S.SectionTitle>
-          <S.CategoryButton onClick={toggleCategoryModal}>카테고리 추가</S.CategoryButton>
-        </S.Section>
-
         {/* 계정 관리 섹션 */}
         <S.Section>
           <S.SectionTitle>계정 관리</S.SectionTitle>
@@ -198,40 +173,6 @@ function UserPage() {
           </S.ActionButtons>
         </S.Section>
       </S.Container>
-
-      {/* 카테고리 추가 모달 */}
-      {showCategoryModal && (
-        <S.ModalOverlay onClick={toggleCategoryModal}>
-          <S.Modal onClick={(e) => e.stopPropagation()}>
-            <S.ModalHeader>
-              <S.ModalTitle>카테고리 추가</S.ModalTitle>
-              <S.CloseButton onClick={toggleCategoryModal}>×</S.CloseButton>
-            </S.ModalHeader>
-            <S.ModalContent>
-              <S.CategoryForm>
-                <S.ModalDescription>새로운 지출/수입 카테고리를 추가하세요.</S.ModalDescription>
-                <S.CategoryExamples>
-                  <S.ExampleTitle>카테고리 예시:</S.ExampleTitle>
-                  <S.ExampleTags>
-                    <S.ExampleTag>🍽️ 식비</S.ExampleTag>
-                    <S.ExampleTag>🚗 교통비</S.ExampleTag>
-                    <S.ExampleTag>🎮 취미</S.ExampleTag>
-                    <S.ExampleTag>💼 부업수입</S.ExampleTag>
-                    <S.ExampleTag>🏠 월세</S.ExampleTag>
-                    <S.ExampleTag>📱 통신비</S.ExampleTag>
-                  </S.ExampleTags>
-                </S.CategoryExamples>
-                <S.ModalButtons>
-                  <S.ModalConfirmButton onClick={handleAddCategory}>
-                    카테고리 추가
-                  </S.ModalConfirmButton>
-                  <S.ModalCancelButton onClick={toggleCategoryModal}>취소</S.ModalCancelButton>
-                </S.ModalButtons>
-              </S.CategoryForm>
-            </S.ModalContent>
-          </S.Modal>
-        </S.ModalOverlay>
-      )}
     </S.PageContainer>
   );
 }
