@@ -271,7 +271,6 @@ export const AuthProvider = ({ children }) => {
     try {
       // 🔥 개발 중에는 verifyUserDev 사용, 백엔드 준비되면 verifyUser로 변경
       const response = await USER_API.verifyUserDev(userId);
-      // const response = await USER_API.verifyUser(userId); // 백엔드 준비 완료 후
 
       if (!response.success) {
         logoutHandler();
@@ -281,8 +280,7 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (error) {
       console.error('사용자 인증 실패:', error);
-      // 🔥 개발 중에는 에러가 나도 로그아웃하지 않음 (선택사항)
-      // logoutHandler();
+      logoutHandler();
       return false;
     }
   };

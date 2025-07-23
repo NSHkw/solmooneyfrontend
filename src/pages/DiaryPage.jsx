@@ -5,12 +5,10 @@ import 'react-calendar/dist/Calendar.css';
 import '../css/DiaryPage.css';
 import diaryImg from '../img/pencil_mooney.png';
 import CategoryChart from '../components/CategoryChart';
-// import EXPENSE_API from './../services/back/expenseApi.js';
-// import DIARY_API from './../services/back/diaryApi.js';
 import AuthContext from '../contexts/AuthContext.jsx';
 
-import EXPENSE_API from './../services/mock/mockExpense.js';
-import DIARY_API from './../services/mock/mockDiary.js';
+import { EXPENSE_API } from '../services/apiService.js';
+import { DIARY_API } from '../services/apiService.js';
 
 const DiaryPage = () => {
   const [date, setDate] = useState(new Date());

@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:mock": "cross-env VITE_USE_MOCK_API=true vite",
+    "dev:real": "cross-env VITE_USE_MOCK_API=false vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
+    "build:mock": "cross-env VITE_USE_MOCK_API=true vite build",
+    "build:real": "cross-env VITE_USE_MOCK_API=false vite build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -41,6 +45,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.5.2",
+    "cross-env": "^7.0.3",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
