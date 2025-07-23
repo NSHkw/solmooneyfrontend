@@ -1,8 +1,9 @@
 // src/contexts/AuthContext.jsx
+// 🔥 실제 백엔드 코드에 맞게 수정된 AuthContext
+
 import React, { createContext, useReducer } from 'react';
 import { toast } from 'react-toastify';
-
-import { USER_API } from '../services/apiService.js';
+import { USER_API } from '../services/apiService.js'; // 🔥 실제 백엔드 API 사용
 
 const AuthContext = createContext();
 
@@ -16,7 +17,6 @@ const authReducer = (state, action) => {
         loading: false,
         isAuthenticated: true,
         user: action.payload.user,
-        userId: action.payload.userId, // 🔥 토큰 대신 userId 저장
         error: null,
       };
     case 'LOGIN_FAILURE':
@@ -26,14 +26,12 @@ const authReducer = (state, action) => {
         error: action.payload,
         isAuthenticated: false,
         user: null,
-        userId: null, // 🔥 userId로 변경
       };
     case 'LOGOUT':
       return {
         ...state,
         isAuthenticated: false,
         user: null,
-        userId: null, // 🔥 userId로 변경
         error: null,
         loading: false,
       };
@@ -49,31 +47,28 @@ const authReducer = (state, action) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  // 🔥 초기 상태에서 userId 체크
   const getInitialState = () => {
-    const userId = localStorage.getItem('userId'); // 🔥 토큰 대신 userId
-    const userData = localStorage.getItem('userData');
+    // 🔥 Mock 세션 확인 추가
+    const mockSession = sessionStorage.getItem('mockSession');
 
-    if (userId && userData) {
+    if (mockSession) {
       try {
+        const sessionData = JSON.parse(mockSession);
+        // 세션이 유효하면 authenticated 상태로 시작
         return {
           isAuthenticated: true,
-          user: JSON.parse(userData),
-          userId: userId, // 🔥 userId 저장
+          user: { loginId: sessionData.userId }, // 기본 정보만
           loading: false,
           error: null,
         };
       } catch (error) {
-        console.error('로컬스토리지 데이터 파싱 오류:', error);
-        localStorage.removeItem('userId'); // 🔥 userId로 변경
-        localStorage.removeItem('userData');
+        sessionStorage.removeItem('mockSession');
       }
     }
 
     return {
       isAuthenticated: false,
       user: null,
-      userId: null, // 🔥 userId로 변경
       loading: false,
       error: null,
     };
@@ -81,23 +76,18 @@ export const AuthProvider = ({ children }) => {
 
   const [state, action] = useReducer(authReducer, getInitialState());
 
-  // 🔥 로그인 함수 (수정됨)
+  // 🔥 로그인 함수
   const loginHandler = async (credentials) => {
     action({ type: 'LOGIN_START' });
 
     try {
       const result = await USER_API.login(credentials);
-      console.log('result', result);
+      console.log('로그인 결과:', result);
 
       if (result.success) {
-        // 🔥 userId를 localStorage에 저장
-        localStorage.setItem('userId', result.data.userId);
-        localStorage.setItem('userData', JSON.stringify(result.data.user));
-
         action({
           type: 'LOGIN_SUCCESS',
           payload: {
-            userId: result.data.userId, // 🔥 토큰 대신 userId
             user: result.data.user,
           },
         });
@@ -112,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 회원가입 함수 (그대로 유지)
+  // 🔥 회원가입 함수
   const registerHandler = async (userData) => {
     action({ type: 'SET_LOADING', payload: true });
 
@@ -131,7 +121,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 아이디 중복 확인
+  // 🔥 아이디 중복 확인
   const checkIdDuplicateHandler = async (id) => {
     try {
       const result = await USER_API.checkIdDuplicate(id);
@@ -142,7 +132,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 닉네임 중복 확인
+  // 🔥 닉네임 중복 확인
   const checkNicknameDuplicateHandler = async (nickname) => {
     try {
       const result = await USER_API.checkNicknameDuplicate(nickname);
@@ -153,8 +143,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 회원정보 수정
-  const updateUserInfoHandler = async (updateData) => {
+  // 🔥 회원정보 수정 - userId와 현재 비밀번호 필요
+  const updateUserInfoHandler = async (updateData, currentPassword) => {
     if (!state.user) {
       toast.error('로그인이 필요합니다.');
       return { success: false, error: '로그인이 필요합니다.' };
@@ -163,12 +153,9 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await USER_API.updateUserInfo(state.user.loginId, updateData); // 🔥 user.id 대신 user.loginId
+      const result = await USER_API.updateUserInfo(state.user.loginId, updateData, currentPassword);
 
       if (result.success) {
-        // 로컬 스토리지 업데이트
-        localStorage.setItem('userData', JSON.stringify(result.data.user));
-
         // 상태 업데이트
         action({
           type: 'UPDATE_USER',
@@ -186,8 +173,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 회원탈퇴
-  const deleteAccountHandler = async (passwordData) => {
+  // 🔥 회원탈퇴 - 비밀번호만 필요 (userId는 세션에서 확인)
+  const deleteAccountHandler = async (password) => {
     if (!state.user) {
       toast.error('로그인이 필요합니다.');
       return { success: false, error: '로그인이 필요합니다.' };
@@ -196,13 +183,9 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await USER_API.deleteAccount(state.user.loginId, passwordData); // 🔥 user.id 대신 user.loginId
+      const result = await USER_API.deleteAccount(password); // 🔥 userId 파라미터 제거
 
       if (result.success) {
-        // 로컬 스토리지 정리
-        localStorage.removeItem('userId'); // 🔥 토큰 대신 userId
-        localStorage.removeItem('userData');
-
         // 상태 초기화
         action({ type: 'LOGOUT' });
 
@@ -217,19 +200,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 사용자 정보 새로고침
+  // 🔥 사용자 정보 새로고침 - userId 필요
   const refreshUserInfo = async () => {
     if (!state.user) {
       return { success: false, error: '로그인이 필요합니다.' };
     }
 
     try {
-      const result = await USER_API.getUserInfo(state.user.loginId); // 🔥 user.id 대신 user.loginId
+      const result = await USER_API.getUserInfo(state.user.loginId);
 
       if (result.success) {
-        // 로컬 스토리지 업데이트
-        localStorage.setItem('userData', JSON.stringify(result.data.user));
-
         // 상태 업데이트
         action({
           type: 'UPDATE_USER',
@@ -244,11 +224,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 로그아웃 함수
-  const logoutHandler = () => {
-    // 로컬 스토리지 정리
-    localStorage.removeItem('userId'); // 🔥 토큰 대신 userId
-    localStorage.removeItem('userData');
+  // 🔥 로그아웃 함수
+  const logoutHandler = async () => {
+    try {
+      // 서버에 로그아웃 요청
+      await USER_API.logout();
+    } catch (error) {
+      console.error('로그아웃 요청 실패:', error);
+      // 에러가 나도 클라이언트는 로그아웃 처리
+    }
 
     // 상태 초기화
     action({ type: 'LOGOUT' });
@@ -257,35 +241,41 @@ export const AuthProvider = ({ children }) => {
     toast.info('로그아웃되었습니다.');
   };
 
-  // 🔥 사용자 인증 체크 함수 (토큰 검증 대신)
+  // 🔥 세션 검증 함수 - userId 필요 (백엔드 요구사항)
   const checkUserAuth = async () => {
-    const userId = localStorage.getItem('userId'); // 🔥 토큰 대신 userId
+    if (!state.user) {
+      return false;
+    }
 
-    if (!userId) {
+    try {
+      // 🔥 백엔드에서 userId를 요구하므로 전달
+      const response = await USER_API.verifyUser(state.user.loginId);
+
+      if (response.success) {
+        // 세션이 유효하면 사용자 정보 업데이트 (최신 정보 반영)
+        action({
+          type: 'UPDATE_USER',
+          payload: response.data.user,
+        });
+        return true;
+      } else {
+        // 세션이 무효하면 로그아웃 처리
+        if (state.isAuthenticated) {
+          action({ type: 'LOGOUT' });
+        }
+        return false;
+      }
+    } catch (error) {
+      console.error('세션 검증 실패:', error);
+      // 세션 검증 실패 시 로그아웃 처리
       if (state.isAuthenticated) {
         action({ type: 'LOGOUT' });
       }
       return false;
     }
-
-    try {
-      // 🔥 개발 중에는 verifyUserDev 사용, 백엔드 준비되면 verifyUser로 변경
-      const response = await USER_API.verifyUserDev(userId);
-
-      if (!response.success) {
-        logoutHandler();
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('사용자 인증 실패:', error);
-      logoutHandler();
-      return false;
-    }
   };
 
-  // 현재 사용자 비밀번호 확인
+  // 🔥 현재 사용자 비밀번호 확인 - userId 필요
   const verifyPasswordHandler = async (password) => {
     if (!state.user) {
       toast.error('로그인이 필요합니다.');
@@ -293,7 +283,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const result = await USER_API.verifyPassword(state.user.loginId, password); // 🔥 user.id 대신 user.loginId
+      const result = await USER_API.verifyPassword(state.user.loginId, password);
       return result;
     } catch (error) {
       toast.error(error.message);
@@ -301,7 +291,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 에러 클리어
+  // 🔥 에러 클리어
   const clearError = () => {
     action({ type: 'CLEAR_ERROR' });
   };
@@ -314,14 +304,14 @@ export const AuthProvider = ({ children }) => {
     login: loginHandler,
     register: registerHandler,
     logout: logoutHandler,
-    checkUserAuth, // 🔥 checkTokenExpiry 대신 checkUserAuth
+    checkUserAuth, // 🔥 백엔드 요구사항에 맞춘 세션 검증
 
     // 중복 확인 함수들
     checkIdDuplicate: checkIdDuplicateHandler,
     checkNicknameDuplicate: checkNicknameDuplicateHandler,
 
     // 회원정보 관리 함수들
-    updateUserInfo: updateUserInfoHandler,
+    updateUserInfo: updateUserInfoHandler, // 🔥 currentPassword 파라미터 추가
     deleteAccount: deleteAccountHandler,
     refreshUserInfo,
     verifyPassword: verifyPasswordHandler,

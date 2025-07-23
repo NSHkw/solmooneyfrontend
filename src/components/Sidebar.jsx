@@ -113,9 +113,7 @@ const Sidebar = ({
 
           <p style={{ margin: 0, fontSize: '14px', textAlign: 'center' }}>
             Welcome,&nbsp;
-            <span style={{ color: '#6B69EE' }}>
-              {user?.name || user?.nickname || user?.id || '사용자'}
-            </span>
+            <span style={{ color: '#6B69EE' }}>{user?.nick || '사용자'}</span>
             님!
           </p>
 

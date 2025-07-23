@@ -100,6 +100,12 @@ function UserPage() {
     await refreshUserInfo();
   };
 
+  console.log('🔍 사용자 정보 디버깅:');
+  console.log('user:', user);
+  console.log('user.regd:', user.regd, typeof user.regd);
+  console.log('user.bir:', user.bir, typeof user.bir);
+  console.log('formatDate(user.regd):', formatDate(user.regd));
+
   // 로딩 상태
   if (loading || isLoading) {
     return (
@@ -159,7 +165,7 @@ function UserPage() {
           </S.ProfileImageContainer>
           <S.ProfileInfo>
             <S.Nickname>{user.nick} 님</S.Nickname>
-            <S.InfoText>아이디: {user.id}</S.InfoText>
+            <S.InfoText>아이디: {user.loginId}</S.InfoText>
             <S.InfoText>가입일: {formatDate(user.regd)}</S.InfoText>
             {user.bir && <S.InfoText>생년월일: {formatDate(user.bir)}</S.InfoText>}
           </S.ProfileInfo>
