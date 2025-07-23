@@ -2,21 +2,33 @@
 import MOCKDATA from '../../assets/mockData';
 
 /**
- * 다이어리 관련 Mock API - localStorage의 사용자 데이터 활용
+ * 다이어리 관련 Mock API - sessionStorage의 세션 데이터 활용
  * mockData 구조: { mdiaId, mdiaMmemId, mdiaDate, mdiaContent }
  * 백엔드 연결 시 이 파일만 실제 API 호출로 변경하면 됨
  */
 
-// localStorage에서 현재 로그인한 사용자 정보 가져오기
+// sessionStorage에서 현재 로그인한 사용자 정보 가져오기 (mockUser.js와 동일한 방식)
 const getCurrentUser = () => {
   try {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      return JSON.parse(userData);
+    // 🔥 localStorage가 아닌 sessionStorage에서 mockSession 가져오기
+    const mockSession = sessionStorage.getItem('mockSession');
+    if (mockSession) {
+      const sessionData = JSON.parse(mockSession);
+
+      // 세션 만료 체크 (1시간)
+      if (Date.now() - sessionData.loginTime > 60 * 60 * 1000) {
+        console.log('❌ 세션 만료');
+        sessionStorage.removeItem('mockSession');
+        return null;
+      }
+
+      // userId 반환 (sessionData.userId가 실제 사용자 ID)
+      return { id: sessionData.userId };
     }
     return null;
   } catch (error) {
-    console.error('사용자 정보를 불러올 수 없습니다:', error);
+    console.error('세션 정보를 불러올 수 없습니다:', error);
+    sessionStorage.removeItem('mockSession');
     return null;
   }
 };
@@ -111,6 +123,7 @@ const saveDiary = async (date, text) => {
       // 기존 일기 수정
       MOCKDATA.mockDiaryData[existingDiaryIndex].mdiaContent = text.trim();
       savedDiary = MOCKDATA.mockDiaryData[existingDiaryIndex];
+      console.log(savedDiary);
       console.log(`일기 수정 완료: ${currentUser.id}, ${dateKey}`);
     } else {
       // 새 일기 생성
@@ -120,6 +133,8 @@ const saveDiary = async (date, text) => {
         mdiaDate: new Date(date),
         mdiaContent: text.trim(),
       };
+
+      console.log(newDiary);
 
       MOCKDATA.mockDiaryData.push(newDiary);
       savedDiary = newDiary;

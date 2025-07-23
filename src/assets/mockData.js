@@ -296,6 +296,19 @@ const mockExpenseData = [
     mexpFrequency: 'MONTHLY',
     mcatId: 1, // 엔터테인먼트
   },
+  {
+    mexpId: 104,
+    mexpMmemId: 'user001',
+    mexpDt: new Date('2025-07-20'),
+    mexpAmt: 17000,
+    mexpDec: '넷플릭스 구독',
+    mexpType: 'E',
+    mexpRpt: 'F',
+    mexpRptdd: new Date('2025-08-20'),
+    mexpStatus: 'COMPLETED',
+    mexpFrequency: 'MONTHLY',
+    mcatId: 1,
+  },
 
   // === 다른 사용자 구독 데이터 ===
   {
@@ -403,6 +416,32 @@ const mockExpenseData = [
     mexpStatus: 'COMPLETED',
     mexpFrequency: null,
     mcatId: 4, // 쇼핑
+  },
+  {
+    mexpId: 306,
+    mexpMmemId: 'user001',
+    mexpDt: new Date('2025-07-20'),
+    mexpAmt: 98765,
+    mexpDec: '온라인 쇼핑',
+    mexpType: 'E',
+    mexpRpt: 'F',
+    mexpRptdd: null,
+    mexpStatus: 'COMPLETED',
+    mexpFrequency: null,
+    mcatId: 4, // 쇼핑
+  },
+  {
+    mexpId: 307,
+    mexpMmemId: 'user001',
+    mexpDt: new Date('2025-07-19'),
+    mexpAmt: 321654,
+    mexpDec: '통신비',
+    mexpType: 'E',
+    mexpRpt: 'F',
+    mexpRptdd: null,
+    mexpStatus: 'COMPLETED',
+    mexpFrequency: null,
+    mcatId: 8, // 쇼핑
   },
 
   // === 수입 데이터 (Income) ===

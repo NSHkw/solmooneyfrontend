@@ -83,8 +83,6 @@ const register = async (userData) => {
 const verifyUser = async (userId) => {
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  console.log('🔍 Mock 세션 검증 시작, userId:', userId);
-
   // 🔥 sessionStorage에서 Mock 세션 확인
   const mockSession = sessionStorage.getItem('mockSession');
 
@@ -116,8 +114,6 @@ const verifyUser = async (userId) => {
       console.log('❌ 사용자 정보 없음');
       throw new Error('세션 만료');
     }
-
-    console.log('✅ Mock 세션 검증 성공');
 
     // 🔥 BACK_USER_API와 동일한 응답 구조
     return {
