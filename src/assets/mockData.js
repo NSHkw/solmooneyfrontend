@@ -237,7 +237,7 @@ const mockExpenseData = [
     mexpDec: 'Figma Professional',
     mexpType: 'E',
     mexpRpt: 'T',
-    mexpRptdd: new Date('2025-09-01'),
+    mexpRptdd: new Date('2025-07-24'),
     mexpStatus: 'PENDING',
     mexpFrequency: 'MONTHLY',
     mcatId: 2, // 업무/생산성

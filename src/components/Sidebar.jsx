@@ -1,4 +1,4 @@
-// src/components/Sidebar.jsx
+// src/components/Sidebar.jsx - 수정된 버전
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../route/routes.js';
 import { useState, useEffect, useRef } from 'react';
@@ -41,6 +41,9 @@ const Sidebar = ({
   ];
 
   const handleMenuClick = async (path, itemId) => {
+    // 🔥 사이드바가 닫혀있으면 클릭 무시
+    if (!isOpen) return;
+
     const isValid = await checkUserAuth();
     if (!isValid) {
       return;
@@ -54,6 +57,9 @@ const Sidebar = ({
   };
 
   const handleRootClick = async () => {
+    // 🔥 사이드바가 닫혀있으면 클릭 무시
+    if (!isOpen) return;
+
     const isValid = await checkUserAuth();
     if (isValid) {
       navigate(ROUTES.ROOT);
@@ -61,6 +67,9 @@ const Sidebar = ({
   };
 
   const handleUserClick = async () => {
+    // 🔥 사이드바가 닫혀있으면 클릭 무시
+    if (!isOpen) return;
+
     const isValid = await checkUserAuth();
     if (isValid) {
       navigate(ROUTES.USER);
@@ -68,6 +77,9 @@ const Sidebar = ({
   };
 
   const handleLogout = () => {
+    // 🔥 사이드바가 닫혀있으면 클릭 무시
+    if (!isOpen) return;
+
     if (window.confirm('정말 로그아웃하시겠습니까?')) {
       logout();
       navigate(ROUTES.LOGIN);
@@ -172,6 +184,8 @@ const Sidebar = ({
           width: '350px',
           height: '100vh',
           zIndex: 1000,
+          // 🔥 핵심 수정: 사이드바가 닫혀있을 때 모든 클릭 이벤트 차단
+          pointerEvents: isOpen ? 'auto' : 'none',
         }}
       >
         {/* Background with circular expansion */}
@@ -232,116 +246,77 @@ const Sidebar = ({
               <span style={{ color: '#6B69EE' }}>{user?.nick || '사용자'}</span>
               님!
             </motion.p>
+          </motion.div>
 
-            {/* Main Menu */}
-            <motion.ul
-              variants={navVariants}
-              style={{
-                listStyle: 'none',
-                padding: 0,
-                marginTop: '30px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px',
-                fontSize: '16px',
-                fontWeight: 500,
-                color: '#333',
-              }}
-            >
-              {sidebarMenu.map((item) => {
-                const isActive = location.pathname === item.path && item.path !== '';
-
-                return (
-                  <motion.li
-                    key={item.id}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05, x: 8 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleMenuClick(item.path, item.id)}
+          {/* Menu Items */}
+          <motion.div variants={navVariants} style={{ flex: 1, marginTop: '30px' }}>
+            {sidebarMenu.map((item) => (
+              <motion.div
+                key={item.id}
+                variants={itemVariants}
+                whileHover={{ scale: 1.05, x: 8 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleMenuClick(item.path, item.id)}
+                style={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',
+                  padding: '12px 15px',
+                  margin: '8px 0',
+                  borderRadius: '10px',
+                  transition: 'background-color 0.2s ease',
+                  backgroundColor:
+                    location.pathname === item.path ? 'rgba(107, 105, 238, 0.1)' : 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(107, 105, 238, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    location.pathname === item.path ? 'rgba(107, 105, 238, 0.1)' : 'transparent';
+                }}
+              >
+                <motion.div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '8px',
+                    backgroundColor: location.pathname === item.path ? '#6B69EE' : '#f0f0f0',
+                  }}
+                  whileHover={{
+                    backgroundColor: location.pathname === item.path ? '#6B69EE' : '#e0e0e0',
+                    rotate: 5,
+                  }}
+                >
+                  <img
+                    src={item.icon}
+                    alt={item.label}
                     style={{
-                      cursor: 'pointer',
-                      padding: '12px 15px',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      backgroundColor: isActive ? '#d6dce6' : 'transparent',
-                      border: `2px solid ${isActive ? '#6B69EE' : 'transparent'}`,
-                      position: 'relative',
-                      transition: 'background-color 0.2s ease',
+                      width: '20px',
+                      height: '20px',
+                      filter: location.pathname === item.path ? 'invert(1)' : 'none',
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = '#d6dce6';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }
-                    }}
-                  >
-                    <motion.div
-                      style={{
-                        width: '32px',
-                        height: '32px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '8px',
-                        backgroundColor: isActive ? '#6B69EE' : '#f0f0f0',
-                      }}
-                      whileHover={{
-                        backgroundColor: isActive ? '#5a5fd8' : '#e0e0e0',
-                        rotate: 5,
-                      }}
-                    >
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        style={{
-                          width: '18px',
-                          height: '18px',
-                          filter: isActive ? 'brightness(0) invert(1)' : 'none',
-                        }}
-                      />
-                    </motion.div>
-
-                    <span style={{ flex: 1 }}>{item.label}</span>
-
-                    {isActive && (
-                      <motion.div
-                        layoutId="activeIndicator"
-                        style={{
-                          position: 'absolute',
-                          right: '8px',
-                          width: '4px',
-                          height: '20px',
-                          backgroundColor: '#6B69EE',
-                          borderRadius: '2px',
-                        }}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    )}
-                  </motion.li>
-                );
-              })}
-            </motion.ul>
+                  />
+                </motion.div>
+                <span
+                  style={{
+                    fontSize: '16px',
+                    fontWeight: location.pathname === item.path ? 'bold' : 'normal',
+                    color: location.pathname === item.path ? '#6B69EE' : '#333',
+                  }}
+                >
+                  {item.label}
+                </span>
+              </motion.div>
+            ))}
           </motion.div>
 
           {/* Footer */}
-          <motion.div
-            variants={footerVariants}
-            style={{
-              fontSize: '14px',
-              color: '#777',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-            }}
-          >
+          <motion.div variants={footerVariants}>
             <motion.div
               variants={itemVariants}
               whileHover={{ scale: 1.05, x: 8 }}
