@@ -1,5 +1,5 @@
-// src/pages/DiaryPage.jsx
-import React, { useState, useEffect, useContext } from 'react';
+// src/pages/DiaryPage.jsx - 성능 최적화 버전
+import React, { useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../css/DiaryPage.css';
@@ -16,6 +16,10 @@ const DiaryPage = () => {
   const [diaryText, setDiaryText] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // 차트 로딩 상태 분리 (차트만 따로 로딩 상태 관리)
+  const [isChartLoading, setIsChartLoading] = useState(false);
+
   const { user, isAuthenticated } = useContext(AuthContext);
 
   // 소비 내역 상태
@@ -25,15 +29,18 @@ const DiaryPage = () => {
     chartData: [],
   });
 
-  const formatDisplayDate = (d) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+  // 날짜 포맷팅 함수를 useMemo로 캐싱
+  const formatDisplayDate = useMemo(() => {
+    return (d) => `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+  }, []);
 
-  // 금액 포맷팅 함수
-  const formatAmount = (amount) => {
+  // 금액 포맷팅 함수를 useCallback으로 캐싱
+  const formatAmount = useCallback((amount) => {
     return new Intl.NumberFormat('ko-KR').format(amount);
-  };
+  }, []);
 
-  // 일기 데이터 로드 함수 - userId 파라미터 제거 (localStorage에서 자동으로 가져옴)
-  const loadDiaryData = async () => {
+  // 일기 데이터 로드 함수 - useCallback으로 최적화
+  const loadDiaryData = useCallback(async () => {
     setIsLoading(true);
     try {
       const diaryResult = await DIARY_API.getDiaryByDate(date);
@@ -49,14 +56,27 @@ const DiaryPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [date]);
 
-  // 소비 내역 로드 함수
-  const loadExpenseData = () => {
+  // 소비 내역 로드 함수 - useCallback으로 최적화 & 비동기 처리
+  const loadExpenseData = useCallback(async () => {
+    setIsChartLoading(true);
+
     try {
-      // userId를 전달하지 않으면 자동으로 현재 로그인한 사용자 사용
+      // 비동기로 처리하여 UI 블로킹 방지
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       const dayExpenseData = EXPENSE_API.getExpensesByDate(date);
-      setExpenseData(dayExpenseData);
+
+      // 데이터가 실제로 변경된 경우에만 상태 업데이트
+      setExpenseData((prevData) => {
+        const hasChanged =
+          prevData.income !== dayExpenseData.income ||
+          prevData.totalExpense !== dayExpenseData.totalExpense ||
+          JSON.stringify(prevData.chartData) !== JSON.stringify(dayExpenseData.chartData);
+
+        return hasChanged ? dayExpenseData : prevData;
+      });
     } catch (error) {
       console.error('지출 데이터 로드 오류:', error);
       setExpenseData({
@@ -64,19 +84,21 @@ const DiaryPage = () => {
         totalExpense: 0,
         chartData: [],
       });
+    } finally {
+      setIsChartLoading(false);
     }
-  };
+  }, [date]);
 
-  // 날짜가 바뀔 때마다 데이터 로드
+  // 날짜가 바뀔 때마다 데이터 로드 - 의존성 배열 최적화
   useEffect(() => {
     if (isAuthenticated && user) {
-      loadDiaryData();
-      loadExpenseData();
+      // 병렬로 실행하여 속도 향상
+      Promise.all([loadDiaryData(), loadExpenseData()]);
     }
-  }, [date, isAuthenticated, user]);
+  }, [date, isAuthenticated, user, loadDiaryData, loadExpenseData]);
 
-  // 일기 저장 함수 - userId 파라미터 제거
-  const saveDiary = async () => {
+  // 일기 저장 함수 - useCallback으로 최적화
+  const saveDiary = useCallback(async () => {
     if (!diaryText.trim()) {
       alert('일기 내용을 입력해주세요.');
       return;
@@ -94,10 +116,10 @@ const DiaryPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [date, diaryText, loadDiaryData]);
 
-  // 일기 삭제 함수 - userId 파라미터 제거
-  const deleteDiary = async () => {
+  // 일기 삭제 함수 - useCallback으로 최적화
+  const deleteDiary = useCallback(async () => {
     if (!window.confirm('정말로 이 일기를 삭제하시겠습니까?')) {
       return;
     }
@@ -113,7 +135,36 @@ const DiaryPage = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [date, loadDiaryData]);
+
+  // 버튼 텍스트 계산을 useMemo로 캐싱
+  const buttonText = useMemo(() => {
+    if (isLoading) {
+      return '⏳ 처리중...';
+    }
+    if (editMode) {
+      return '💾 저장';
+    }
+    return diaryText.trim() ? '✏️ 수정하기' : '✏️ 일기 쓰기';
+  }, [isLoading, editMode, diaryText]);
+
+  // 버튼 클릭 핸들러를 useCallback으로 최적화
+  const handleButtonClick = useCallback(() => {
+    if (isLoading) return;
+
+    if (editMode) {
+      saveDiary();
+    } else {
+      setEditMode(true);
+    }
+  }, [isLoading, editMode, saveDiary]);
+
+  // 달력 변경 핸들러를 useCallback으로 최적화
+  const handleDateChange = useCallback((newDate) => {
+    setDate(newDate);
+    setShowCalendar(false);
+    setEditMode(false); // 날짜 변경 시 편집 모드 해제
+  }, []);
 
   // 로그인하지 않은 경우
   if (!isAuthenticated || !user) {
@@ -133,27 +184,6 @@ const DiaryPage = () => {
     );
   }
 
-  // 일기 내용이 있는지 확인하여 버튼 텍스트 결정
-  const getButtonText = () => {
-    if (isLoading) {
-      return '⏳ 처리중...';
-    }
-    if (editMode) {
-      return '💾 저장';
-    }
-    return diaryText.trim() ? '✏️ 수정하기' : '✏️ 일기 쓰기';
-  };
-
-  const handleButtonClick = () => {
-    if (isLoading) return;
-
-    if (editMode) {
-      saveDiary();
-    } else {
-      setEditMode(true);
-    }
-  };
-
   return (
     <div className="diary-container">
       <div className="left-panel">
@@ -168,14 +198,7 @@ const DiaryPage = () => {
           <div className="diary-calendar-wrapper">
             {showCalendar && (
               <div className="diary-calendar-popup">
-                <Calendar
-                  onChange={(newDate) => {
-                    setDate(newDate);
-                    setShowCalendar(false);
-                    setEditMode(false); // 날짜 변경 시 편집 모드 해제
-                  }}
-                  value={date}
-                />
+                <Calendar onChange={handleDateChange} value={date} />
               </div>
             )}
           </div>
@@ -196,7 +219,22 @@ const DiaryPage = () => {
             </div>
           ) : (
             <div className="chart-wrapper">
-              <CategoryChart data={expenseData.chartData} />
+              {/* 차트 로딩 상태 별도 관리 */}
+              {isChartLoading ? (
+                <div
+                  style={{
+                    height: '200px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#666',
+                  }}
+                >
+                  📊 차트 로딩 중...
+                </div>
+              ) : (
+                <CategoryChart data={expenseData.chartData} />
+              )}
             </div>
           )}
         </div>
@@ -247,7 +285,7 @@ const DiaryPage = () => {
                 onChange={(e) => setDiaryText(e.target.value)}
                 placeholder="오늘의 소비와 하루를 돌아보며 일기를 작성해보세요..."
               />
-              <button onClick={handleButtonClick}>{getButtonText()}</button>
+              <button onClick={handleButtonClick}>{buttonText}</button>
             </>
           ) : (
             /* 읽기 모드 */
@@ -264,7 +302,7 @@ const DiaryPage = () => {
                     <p className="empty-msg">아직 작성된 일기가 없습니다 😊</p>
                   )}
                 </div>
-                <button onClick={handleButtonClick}>{getButtonText()}</button>
+                <button onClick={handleButtonClick}>{buttonText}</button>
               </>
             )
           )}
