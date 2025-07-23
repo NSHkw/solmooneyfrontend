@@ -61,6 +61,7 @@ const mockUserData = [
     mmemPw: 'testuser123',
     mmemNick: '가계부마스터',
     mmemPphoto: null, // 프로필 사진이 없는 경우
+    mmemRegd: new Date('1999-01-01'),
     mmemBir: new Date('1995-06-20'),
     mmemPnt: 15750, // 포인트
   },
@@ -69,6 +70,7 @@ const mockUserData = [
     mmemPw: 'user001',
     mmemNick: 'user000000',
     mmemPphoto: null,
+    mmemRegd: new Date('1999-01-01'),
     mmemBir: new Date('2020-05-05'),
     mmemPnt: 11111,
   },
@@ -77,6 +79,7 @@ const mockUserData = [
     mmemPw: 'user002',
     mmemNick: 'user023456',
     mmemPphoto: null,
+    mmemRegd: new Date('1999-01-01'),
     mmemBir: new Date('2020-05-09'),
     mmemPnt: 456,
   },
