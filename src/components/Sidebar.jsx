@@ -181,7 +181,7 @@ const Sidebar = ({
           position: 'fixed',
           top: 0,
           left: 0,
-          width: '350px',
+          width: '240px',
           height: '100vh',
           zIndex: 1000,
           // 🔥 핵심 수정: 사이드바가 닫혀있을 때 모든 클릭 이벤트 차단
@@ -197,7 +197,7 @@ const Sidebar = ({
             top: 0,
             left: 0,
             bottom: 0,
-            width: '350px',
+            width: '240px',
             boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
           }}
         />

@@ -299,11 +299,11 @@ const mockExpenseData = [
   {
     mexpId: 104,
     mexpMmemId: 'user001',
-    mexpDt: new Date('2025-07-20'),
+    mexpDt: new Date('2025-07-23'),
     mexpAmt: 17000,
     mexpDec: '넷플릭스 구독',
     mexpType: 'E',
-    mexpRpt: 'F',
+    mexpRpt: 'T',
     mexpRptdd: new Date('2025-08-20'),
     mexpStatus: 'COMPLETED',
     mexpFrequency: 'MONTHLY',

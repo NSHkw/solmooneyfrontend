@@ -147,21 +147,25 @@ function SubscriptionPage() {
 
   // 지출한 것 필터링 (MEXP_STATUS = 'COMPLETED', MEXP_RPT = 'T', 최근 일주일)
   const getCompletedPayments = () => {
-    const oneWeekAgo = new Date(today);
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
     return expenses.filter((expense) => {
+      // 현재 로그인한 유저의 데이터만 (user001로 하드코딩되어 있음)
+      if (expense.mexpMmemId !== 'user001') return false;
+
       // 구독만 (MEXP_RPT = 'T')
       if (expense.mexpRpt !== 'T') return false;
 
       // 완료된 것만
       if (expense.mexpStatus !== 'COMPLETED') return false;
 
-      // 실제 지출일이 있고 최근 일주일 내
+      // 실제 지출일이 있어야 함
       if (!expense.mexpDt) return false;
 
+      // 실제 지출일이 3일 전부터 오늘까지
       const expenseDate = new Date(expense.mexpDt);
-      return expenseDate >= oneWeekAgo && expenseDate <= today;
+      return expenseDate >= threeDaysAgo && expenseDate <= today;
     });
   };
 
@@ -600,7 +604,7 @@ function SubscriptionPage() {
 
           {/* 지출한 것 */}
           <S.SubscriptionListContainer style={{ marginTop: '20px' }}>
-            <h3>✅ 지출 완료</h3>
+            <h3>✅ 지출 완료 (최근 3일)</h3>
             <S.SubscriptionList>
               {getCompletedPayments().map((expense) => {
                 const dueDate = new Date(expense.mexpRptdd);
@@ -653,6 +657,20 @@ function SubscriptionPage() {
                   </S.SubscriptionCard>
                 );
               })}
+
+              {/* 지출 완료 데이터가 없을 때 */}
+              {getCompletedPayments().length === 0 && (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    color: '#666',
+                    padding: '40px 20px',
+                    fontSize: '14px',
+                  }}
+                >
+                  최근 3일간 지출 완료된 구독이 없습니다.
+                </div>
+              )}
             </S.SubscriptionList>
           </S.SubscriptionListContainer>
         </S.LeftColumn>
@@ -673,7 +691,7 @@ function SubscriptionPage() {
 
           {/* 최근 지출 통계 */}
           <S.StatsCard>
-            <h3>💸 최근 일주일 지출</h3>
+            <h3>💸 최근 3일 지출</h3>
             <div className="total-amount">{getTotalCompletedAmount().toLocaleString()}원</div>
             <div className="breakdown">
               <div className="paid">완료: {getCompletedPayments().length}개</div>
@@ -682,7 +700,7 @@ function SubscriptionPage() {
 
           {/* 카테고리별 지출 차트 */}
           <S.ChartContainer>
-            <h3>카테고리별 지출 (최근 일주일)</h3>
+            <h3>카테고리별 지출 (최근 3일)</h3>
             {getChartData().length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={getChartData()} barSize={30}>
@@ -706,7 +724,7 @@ function SubscriptionPage() {
               </ResponsiveContainer>
             ) : (
               <div style={{ textAlign: 'center', color: '#666', padding: '40px' }}>
-                최근 지출 내역이 없습니다.
+                최근 3일간 지출 내역이 없습니다.
               </div>
             )}
           </S.ChartContainer>
