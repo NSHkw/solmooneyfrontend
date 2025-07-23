@@ -1,9 +1,8 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useReducer } from 'react';
 import { toast } from 'react-toastify';
-// import USER_API from '../services/back/userApi.js';
 
-import USER_API from '../services/mock/mockUser.js';
+import { USER_API } from '../services/apiService.js';
 
 const AuthContext = createContext();
 

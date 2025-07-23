@@ -8,6 +8,6 @@ import MOCKDATA from '../../assets/mockData.js';
 
 // 맨 처음 useEffect할 때 구독관련 데이터가 바로 들어가게 되어야 함 (그 이후 계산)
 
-const SUBSCRIPTION_API = {};
+const MOCK_SUBSCRIPTION_API = {};
 
-export default SUBSCRIPTION_API;
+export default MOCK_SUBSCRIPTION_API;

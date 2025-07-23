@@ -1,5 +1,5 @@
 // src/services/back/subscriptionApi.js
 
-const SUBSCRIPTION_API = {};
+const BACK_SUBSCRIPTION_API = {};
 
-export default SUBSCRIPTION_API;
+export default BACK_SUBSCRIPTION_API;
