@@ -669,6 +669,16 @@ const mockChallengeData = [
     mchlReward: 100,
     mchlContents: '9월 쇼핑 절약하기',
   },
+  {
+    mchlId: 6,
+    mchlMmemId: 'user001',
+    mchlName: '7월 말 일주일 절약 챌린지',
+    mchlTargetAmount: 100000,
+    mchlStartDate: new Date('2025-07-21'),
+    mchlEndDate: new Date('2025-07-27'),
+    mchlReward: 100,
+    mchlContents: '7월 절약',
+  },
 ];
 
 const MOCKDATA = {
