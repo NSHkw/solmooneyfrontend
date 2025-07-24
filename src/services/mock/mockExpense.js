@@ -139,3 +139,5 @@ const MOCK_EXPENSE_API = {
 };
 
 export default MOCK_EXPENSE_API;
+
+// AccountBookPage.jsx에 카테고리 추가 삭제에 대한 기능이 존재하기 때문에 category 추가 삭제 api는 여기에 넣는 게 맞는 것 같다
