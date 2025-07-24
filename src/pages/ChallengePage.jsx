@@ -1,6 +1,6 @@
 // src/pages/ChallengePage.jsx
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { showError, showSuccess } from '../utils/toast';
+import { showError, showSuccess, showInfo, showWarning } from '../utils/toast';
 import { CHALLENGE_API } from '../services/apiService';
 import S from '../styles/challengePage.style';
 
@@ -16,8 +16,9 @@ function ChallengePage() {
   const [formCurrentAmount, setFormCurrentAmount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [userPoints, setUserPoints] = useState(0);
+  const [editingChallenge, setEditingChallenge] = useState(null); // 수정할 챌린지
 
-  // 챌린지 추가 모달 initial Data
+  // 챌린지 추가/수정 모달 initial Data
   const [formData, setFormData] = useState({
     title: '',
     startDate: '',
@@ -232,7 +233,9 @@ function ChallengePage() {
     return Math.round((successCount / previousChallenges.length) * 100);
   }, [previousChallenges]);
 
+  // 챌린지 추가 모달 열기
   const handleOpenModal = useCallback(() => {
+    setEditingChallenge(null);
     setIsModalOpen(true);
     setFormCurrentAmount(0);
     setFormData({
@@ -243,10 +246,56 @@ function ChallengePage() {
       reward: '',
       contents: '',
     });
+    showInfo('새로운 챌린지를 만들어보세요! ✨');
   }, []);
+
+  // 챌린지 수정 모달 열기
+  const handleEditChallenge = useCallback((challenge) => {
+    setEditingChallenge(challenge);
+    setFormData({
+      title: challenge.title,
+      startDate: challenge.startDate,
+      endDate: challenge.endDate,
+      targetAmount: challenge.targetAmount.toString(),
+      reward: challenge.reward.toString(),
+      contents: challenge.contents,
+    });
+    setIsModalOpen(true);
+    showInfo(`${challenge.title} 챌린지를 수정합니다.`);
+  }, []);
+
+  // 챌린지 삭제
+  const handleDeleteChallenge = useCallback(
+    async (challengeId) => {
+      const challenge = allChallenges.find((item) => item.id === challengeId);
+
+      if (window.confirm(`'${challenge?.title}' 챌린지를 정말로 삭제하시겠습니까?`)) {
+        try {
+          const response = await CHALLENGE_API.deleteChallenge(challengeId);
+
+          if (response.success) {
+            // 챌린지 목록 새로고침
+            const challengesResponse = await CHALLENGE_API.getAllChallenges();
+            if (challengesResponse.success) {
+              setAllChallenges(challengesResponse.data);
+            }
+
+            showSuccess(response.message);
+          } else {
+            showError(response.message || '챌린지 삭제에 실패했습니다.');
+          }
+        } catch (error) {
+          showError(error.message || '챌린지 삭제 중 오류가 발생했습니다.');
+          console.error('Delete error:', error);
+        }
+      }
+    },
+    [allChallenges],
+  );
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
+    setEditingChallenge(null);
     setFormCurrentAmount(0);
     setFormData({
       title: '',
@@ -317,7 +366,8 @@ function ChallengePage() {
     return true;
   }, []);
 
-  const handleCreateChallenge = useCallback(
+  // 챌린지 생성/수정 처리
+  const handleCreateOrUpdateChallenge = useCallback(
     async (e) => {
       e.preventDefault();
 
@@ -326,7 +376,15 @@ function ChallengePage() {
       }
 
       try {
-        const response = await CHALLENGE_API.createChallenge(formData);
+        let response;
+
+        if (editingChallenge) {
+          // 수정 모드
+          response = await CHALLENGE_API.updateChallenge(editingChallenge.id, formData);
+        } else {
+          // 추가 모드
+          response = await CHALLENGE_API.createChallenge(formData);
+        }
 
         if (response.success) {
           // 챌린지 목록 새로고침
@@ -336,20 +394,24 @@ function ChallengePage() {
           }
 
           // 성공 메시지
-          showSuccess('🎉 챌린지가 성공적으로 생성되었습니다!', {
+          const message = editingChallenge
+            ? '🎉 챌린지가 성공적으로 수정되었습니다!'
+            : '🎉 챌린지가 성공적으로 생성되었습니다!';
+
+          showSuccess(message, {
             autoClose: 4000,
           });
 
           handleCloseModal();
         } else {
-          showError(response.message || '챌린지 생성에 실패했습니다.');
+          showError(response.message || '챌린지 처리에 실패했습니다.');
         }
       } catch (error) {
-        console.error('챌린지 생성 실패:', error);
-        showError('챌린지 생성 중 오류가 발생했습니다.');
+        console.error('챌린지 처리 실패:', error);
+        showError('챌린지 처리 중 오류가 발생했습니다.');
       }
     },
-    [formData, validateForm, handleCloseModal],
+    [formData, validateForm, handleCloseModal, editingChallenge],
   );
 
   // 상태별 배경색 결정
@@ -451,6 +513,24 @@ function ChallengePage() {
               {(currentChallenge.targetAmount - currentChallenge.currentAmount).toLocaleString()}원
             </S.AmountDisplay>
 
+            {/* 액션 버튼들 */}
+            <S.ActionButtons>
+              <S.ActionButton
+                key={`current-edit-${currentChallenge.id}`}
+                variant="edit"
+                onClick={() => handleEditChallenge(currentChallenge)}
+              >
+                수정
+              </S.ActionButton>
+              <S.ActionButton
+                key={`current-delete-${currentChallenge.id}`}
+                variant="delete"
+                onClick={() => handleDeleteChallenge(currentChallenge.id)}
+              >
+                삭제
+              </S.ActionButton>
+            </S.ActionButtons>
+
             {currentChallenge.status !== challengeStatus.ONGOING && (
               <S.StatusBadge bgColor={getStatusColor(currentChallenge.status)}>
                 {currentChallenge.status}
@@ -488,6 +568,17 @@ function ChallengePage() {
                   사용 금액: {item.currentAmount.toLocaleString()} /{' '}
                   {item.targetAmount.toLocaleString()}원 ({Math.round(item.gaugeBar)}%)
                 </S.PreviousChallengeDetails>
+
+                {/* 이전 챌린지 액션 버튼들 */}
+                <S.ActionButtons>
+                  <S.ActionButton
+                    key={`previous-delete-${item.id}`}
+                    variant="delete"
+                    onClick={() => handleDeleteChallenge(item.id)}
+                  >
+                    삭제
+                  </S.ActionButton>
+                </S.ActionButtons>
               </S.PreviousChallengeItem>
             ))
           ) : (
@@ -525,6 +616,24 @@ function ChallengePage() {
                 <S.PendingChallengeInfo>
                   목표: {challenge.targetAmount.toLocaleString()}원
                 </S.PendingChallengeInfo>
+
+                {/* 대기중 챌린지 액션 버튼들 */}
+                <S.ActionButtons>
+                  <S.ActionButton
+                    key={`pending-edit-${challenge.id}`}
+                    variant="edit"
+                    onClick={() => handleEditChallenge(challenge)}
+                  >
+                    수정
+                  </S.ActionButton>
+                  <S.ActionButton
+                    key={`pending-delete-${challenge.id}`}
+                    variant="delete"
+                    onClick={() => handleDeleteChallenge(challenge.id)}
+                  >
+                    삭제
+                  </S.ActionButton>
+                </S.ActionButtons>
               </S.PendingChallengeItem>
             ))
           ) : (
@@ -537,8 +646,8 @@ function ChallengePage() {
       {isModalOpen && (
         <S.ModalOverlay>
           <S.ModalContent>
-            <S.ModalTitle>Challenge 추가</S.ModalTitle>
-            <form onSubmit={handleCreateChallenge}>
+            <S.ModalTitle>{editingChallenge ? 'Challenge 수정' : 'Challenge 추가'}</S.ModalTitle>
+            <form onSubmit={handleCreateOrUpdateChallenge}>
               <S.FormGroup>
                 <S.Label>챌린지 이름</S.Label>
                 <S.Input
@@ -608,15 +717,17 @@ function ChallengePage() {
                 />
               </S.FormGroup>
 
-              <S.FormGroup>
-                <S.Label>현재 소비 금액</S.Label>
-                <S.CurrentAmountDisplay>
-                  {formCurrentAmount.toLocaleString()}원
-                </S.CurrentAmountDisplay>
-              </S.FormGroup>
+              {!editingChallenge && (
+                <S.FormGroup>
+                  <S.Label>현재 소비 금액</S.Label>
+                  <S.CurrentAmountDisplay>
+                    {formCurrentAmount.toLocaleString()}원
+                  </S.CurrentAmountDisplay>
+                </S.FormGroup>
+              )}
 
               <S.ButtonRow>
-                <S.SubmitButton type="submit">생성</S.SubmitButton>
+                <S.SubmitButton type="submit">{editingChallenge ? '수정' : '생성'}</S.SubmitButton>
                 <S.CancelButton type="button" onClick={handleCloseModal}>
                   취소
                 </S.CancelButton>

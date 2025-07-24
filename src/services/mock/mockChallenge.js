@@ -100,6 +100,82 @@ const createChallenge = async (challengeData) => {
 };
 
 /**
+ * 챌린지 수정
+ * @param {number} challengeId - 수정할 챌린지 ID
+ * @param {Object} challengeData - 수정할 챌린지 데이터
+ * @param {string} userId - 사용자 ID (선택사항)
+ * @returns {Promise<Object>} - 수정 결과
+ */
+const updateChallenge = async (challengeId, challengeData, userId = null) => {
+  await new Promise((resolve) => setTimeout(resolve, 500)); // API 지연 시뮬레이션
+
+  try {
+    const currentUserId = userId || getCurrentUser();
+
+    // 폼 유효성 검사
+    if (!challengeData.title?.trim()) {
+      throw new Error('챌린지 이름을 입력해주세요.');
+    }
+
+    if (!challengeData.startDate) {
+      throw new Error('시작 날짜를 선택해주세요.');
+    }
+
+    if (!challengeData.endDate) {
+      throw new Error('종료 날짜를 선택해주세요.');
+    }
+
+    if (!challengeData.targetAmount || parseInt(challengeData.targetAmount) <= 0) {
+      throw new Error('올바른 목표 금액을 입력해주세요.');
+    }
+
+    if (challengeData.reward && (challengeData.reward < 10 || challengeData.reward > 200)) {
+      throw new Error('보상 포인트는 최소 10포인트, 최대 200포인트입니다.');
+    }
+
+    const challengeIndex = MOCKDATA.mockChallengeData.findIndex(
+      (challenge) => challenge.mchlId === challengeId && challenge.mchlMmemId === currentUserId,
+    );
+
+    if (challengeIndex === -1) {
+      throw new Error('수정할 챌린지를 찾을 수 없습니다.');
+    }
+
+    // 기존 데이터 업데이트
+    const updatedChallenge = {
+      ...MOCKDATA.mockChallengeData[challengeIndex],
+      mchlName: challengeData.title,
+      mchlTargetAmount: parseInt(challengeData.targetAmount),
+      mchlStartDate: new Date(challengeData.startDate),
+      mchlEndDate: new Date(challengeData.endDate),
+      mchlReward: parseInt(challengeData.reward) || 0,
+      mchlContents: challengeData.contents || '',
+    };
+
+    MOCKDATA.mockChallengeData[challengeIndex] = updatedChallenge;
+
+    return {
+      success: true,
+      message: `${challengeData.title} 챌린지가 성공적으로 수정되었습니다!`,
+      data: {
+        id: updatedChallenge.mchlId,
+        title: updatedChallenge.mchlName,
+        startDate: updatedChallenge.mchlStartDate.toISOString().split('T')[0],
+        endDate: updatedChallenge.mchlEndDate.toISOString().split('T')[0],
+        targetAmount: updatedChallenge.mchlTargetAmount,
+        reward: updatedChallenge.mchlReward,
+        contents: updatedChallenge.mchlContents,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+/**
  * 특정 기간의 소비 내역 계산
  * @param {string} startDate - 시작 날짜 (YYYY-MM-DD)
  * @param {string} endDate - 종료 날짜 (YYYY-MM-DD, 선택사항)
@@ -156,26 +232,35 @@ const getExpenseAmount = async (startDate, endDate = null, userId = null) => {
 const deleteChallenge = async (challengeId, userId = null) => {
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  const currentUserId = userId || getCurrentUser();
+  try {
+    const currentUserId = userId || getCurrentUser();
 
-  const challengeIndex = MOCKDATA.mockChallengeData.findIndex(
-    (challenge) => challenge.mchlId === challengeId && challenge.mchlMmemId === currentUserId,
-  );
+    const challengeIndex = MOCKDATA.mockChallengeData.findIndex(
+      (challenge) => challenge.mchlId === challengeId && challenge.mchlMmemId === currentUserId,
+    );
 
-  if (challengeIndex === -1) {
+    if (challengeIndex === -1) {
+      return {
+        success: false,
+        message: '삭제할 챌린지를 찾을 수 없습니다.',
+      };
+    }
+
+    const deletedChallenge = MOCKDATA.mockChallengeData[challengeIndex];
+
+    // mockData에서 제거
+    MOCKDATA.mockChallengeData.splice(challengeIndex, 1);
+
+    return {
+      success: true,
+      message: `${deletedChallenge.mchlName} 챌린지가 삭제되었습니다.`,
+    };
+  } catch (error) {
     return {
       success: false,
-      message: '챌린지를 찾을 수 없습니다.',
+      message: error.message || '챌린지 삭제 중 오류가 발생했습니다.',
     };
   }
-
-  // mockData에서 제거
-  MOCKDATA.mockChallengeData.splice(challengeIndex, 1);
-
-  return {
-    success: true,
-    message: '챌린지가 삭제되었습니다.',
-  };
 };
 
 /**
@@ -283,6 +368,7 @@ const getChallengeSuccessRate = async (userId = null) => {
 const MOCK_CHALLENGE_API = {
   getAllChallenges,
   createChallenge,
+  updateChallenge, // 🔥 새로 추가
   getExpenseAmount,
   deleteChallenge,
   getChallengeById,
