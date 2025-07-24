@@ -590,6 +590,32 @@ const mockExpenseData = [
     mexpFrequency: null,
     mcatId: 9, // 건강/의료
   },
+  {
+    mexpId: 509,
+    mexpMmemId: 'user001',
+    mexpDt: new Date('2025-02-22'),
+    mexpAmt: 1110000,
+    mexpDec: '의료비',
+    mexpType: 'E',
+    mexpRpt: 'F',
+    mexpRptdd: null,
+    mexpStatus: 'COMPLETED',
+    mexpFrequency: null,
+    mcatId: 9, // 건강/의료
+  },
+  {
+    mexpId: 510,
+    mexpMmemId: 'user001',
+    mexpDt: new Date('2025-07-22'),
+    mexpAmt: 1110000,
+    mexpDec: '의료비',
+    mexpType: 'E',
+    mexpRpt: 'F',
+    mexpRptdd: null,
+    mexpStatus: 'COMPLETED',
+    mexpFrequency: null,
+    mcatId: 9, // 건강/의료
+  },
 ];
 
 // 일기 데이터 (MOONEY_DIARY 테이블 구조에 맞춤)
