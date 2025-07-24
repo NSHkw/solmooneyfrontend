@@ -7,8 +7,7 @@ import diaryImg from '../img/pencil_mooney.png';
 import CategoryChart from '../components/CategoryChart';
 import AuthContext from '../contexts/AuthContext.jsx';
 
-import { EXPENSE_API } from '../services/apiService.js';
-import { DIARY_API } from '../services/apiService.js';
+import { EXPENSE_API, DIARY_API } from '../services/apiService.js';
 
 const DiaryPage = () => {
   const [date, setDate] = useState(new Date());
