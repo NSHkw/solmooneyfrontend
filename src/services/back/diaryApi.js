@@ -1,37 +1,19 @@
 // src/services/back/diaryApi.js
 /**
- * 다이어리 관련 실제 백엔드 API
- * mock API와 동일한 인터페이스 제공
- * 사용법: DiaryPage.jsx에서 import만 변경하면 됨
- * import DIARY_API from './../services/back/diaryApi';
+ * 다이어리 관련 실제 백엔드 API (순수 세션 기반)
+ * Java Spring Boot Controller 엔드포인트에 맞게 구현
+ * 토큰이나 localStorage 없이 세션 쿠키만 사용
  */
 
-const SERVER_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const SERVER_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-// localStorage에서 현재 로그인한 사용자 정보 가져오기 (mock과 동일)
-const getCurrentUser = () => {
-  try {
-    const userData = localStorage.getItem('userData');
-    if (userData) {
-      return JSON.parse(userData);
-    }
-    return null;
-  } catch (error) {
-    console.error('사용자 정보를 불러올 수 없습니다:', error);
-    return null;
-  }
-};
-
-// 공통 fetch 요청 함수
+// 공통 fetch 요청 함수 (순수 세션 기반)
 const apiRequest = async (url, options = {}) => {
-  const token = localStorage.getItem('token');
-
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
     },
-    credentials: 'include',
+    credentials: 'include', // 세션 쿠키만 사용
   };
 
   const config = {
@@ -51,6 +33,11 @@ const apiRequest = async (url, options = {}) => {
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
+    // 204 No Content인 경우 빈 객체 반환
+    if (response.status === 204) {
+      return {};
+    }
+
     return await response.json();
   } catch (error) {
     console.error('API 요청 중 오류:', error);
@@ -58,60 +45,91 @@ const apiRequest = async (url, options = {}) => {
   }
 };
 
-// 날짜 키 포맷팅 유틸리티 (mock과 동일)
+// 날짜 키 포맷팅 유틸리티
 const formatDateKey = (date) => {
   const d = new Date(date);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
 /**
- * 특정 날짜의 일기 조회 (현재 로그인한 사용자)
- * @param {Date|string} date - 날짜
- * @returns {Promise<Object>} - 일기 데이터
+ * 현재 로그인한 사용자 정보 가져오기 (세션에서)
+ * AuthContext에서 관리하는 사용자 정보 대신 세션 확인 API 호출
+ */
+const getCurrentUserId = async () => {
+  try {
+    // 세션 검증 API 호출해서 현재 사용자 ID 가져오기
+    const response = await apiRequest('/session/check', {
+      method: 'GET',
+    });
+
+    if (response.isLogined && response.userInfo) {
+      return response.userInfo.id;
+    }
+
+    throw new Error('로그인이 필요합니다.');
+  } catch (error) {
+    throw new Error('로그인이 필요합니다.');
+  }
+};
+
+/**
+ * 특정 날짜의 일기 조회
+ * Spring Boot Controller: GET /diaries/member/{memberId}/all 후 클라이언트에서 필터링
  */
 const getDiaryByDate = async (date) => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error('로그인이 필요합니다.');
-    }
-
+    const userId = await getCurrentUserId();
     const dateString = formatDateKey(date);
 
-    const result = await apiRequest(`/diary/date?date=${dateString}`, {
+    // 전체 일기 목록을 가져와서 날짜로 필터링
+    const result = await apiRequest(`/diaries/member/${userId}/all`, {
       method: 'GET',
+    });
+
+    // 응답이 배열인 경우 (Java Controller가 List<Diary> 반환)
+    const diaries = Array.isArray(result) ? result : [];
+
+    // 특정 날짜의 일기 찾기
+    const diary = diaries.find((diary) => {
+      const diaryDateKey = formatDateKey(diary.mdiaDate);
+      return diaryDateKey === dateString;
     });
 
     return {
       success: true,
-      data: result.diary
+      data: diary
         ? {
-            mdiaId: result.diary.mdiaId,
-            mdiaMmemId: result.diary.mdiaMmemId,
-            mdiaDate: result.diary.mdiaDate,
-            mdiaContent: result.diary.mdiaContent,
-            text: result.diary.mdiaContent,
+            mdiaId: diary.mdiaId,
+            mdiaMmemId: diary.member?.mmemid || userId,
+            mdiaDate: diary.mdiaDate,
+            mdiaContent: diary.mdiaContent,
+            text: diary.mdiaContent,
           }
         : null,
     };
   } catch (error) {
     console.error('일기 조회 중 오류:', error);
+
+    // 404 에러인 경우 (일기가 없는 경우)
+    if (error.message.includes('404')) {
+      return {
+        success: true,
+        data: null,
+      };
+    }
+
     throw new Error('일기를 불러올 수 없습니다.');
   }
 };
 
 /**
- * 일기 저장/수정 (현재 로그인한 사용자)
- * @param {Date|string} date - 날짜
- * @param {string} text - 일기 내용
- * @returns {Promise<Object>} - 저장 결과
+ * 일기 저장/수정
+ * Spring Boot Controller: POST /diaries/member/{memberId} (새 일기)
+ *                        PUT /diaries/{diaryId} (기존 일기 수정)
  */
 const saveDiary = async (date, text) => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const userId = await getCurrentUserId();
 
     if (!text || text.trim().length === 0) {
       throw new Error('일기 내용을 입력해주세요.');
@@ -119,25 +137,53 @@ const saveDiary = async (date, text) => {
 
     const dateString = formatDateKey(date);
 
-    const result = await apiRequest('/diary', {
-      method: 'POST',
-      body: JSON.stringify({
-        mdiaDate: dateString,
-        mdiaContent: text.trim(),
-      }),
-    });
+    // 먼저 해당 날짜의 기존 일기가 있는지 확인
+    const existingDiary = await getDiaryByDate(date);
 
-    return {
-      success: true,
-      message: result.message || '일기가 저장되었습니다.',
-      data: {
-        mdiaId: result.diary.mdiaId,
-        mdiaMmemId: result.diary.mdiaMmemId,
-        mdiaDate: result.diary.mdiaDate,
-        mdiaContent: result.diary.mdiaContent,
-        text: result.diary.mdiaContent,
-      },
-    };
+    if (existingDiary.data) {
+      // 기존 일기 업데이트 - PUT /diaries/{diaryId}
+      const updateResult = await apiRequest(`/diaries/${existingDiary.data.mdiaId}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          mdiaId: existingDiary.data.mdiaId,
+          mdiaDate: dateString,
+          mdiaContent: text.trim(),
+        }),
+      });
+
+      return {
+        success: true,
+        message: '일기가 수정되었습니다.',
+        data: {
+          mdiaId: updateResult.mdiaId,
+          mdiaMmemId: updateResult.member?.mmemid || userId,
+          mdiaDate: updateResult.mdiaDate,
+          mdiaContent: updateResult.mdiaContent,
+          text: updateResult.mdiaContent,
+        },
+      };
+    } else {
+      // 새 일기 생성 - POST /diaries/member/{memberId}
+      const createResult = await apiRequest(`/diaries/member/${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          mdiaDate: dateString,
+          mdiaContent: text.trim(),
+        }),
+      });
+
+      return {
+        success: true,
+        message: '일기가 저장되었습니다.',
+        data: {
+          mdiaId: createResult.mdiaId,
+          mdiaMmemId: createResult.member?.mmemid || userId,
+          mdiaDate: createResult.mdiaDate,
+          mdiaContent: createResult.mdiaContent,
+          text: createResult.mdiaContent,
+        },
+      };
+    }
   } catch (error) {
     console.error('일기 저장 중 오류:', error);
     throw error;
@@ -145,28 +191,29 @@ const saveDiary = async (date, text) => {
 };
 
 /**
- * 일기 삭제 (현재 로그인한 사용자)
- * @param {Date|string} date - 날짜
- * @returns {Promise<Object>} - 삭제 결과
+ * 일기 삭제
+ * Spring Boot Controller: DELETE /diaries/{diaryId}
  */
 const deleteDiary = async (date) => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error('로그인이 필요합니다.');
+    // 먼저 해당 날짜의 일기 찾기
+    const existingDiary = await getDiaryByDate(date);
+
+    if (!existingDiary.data) {
+      throw new Error('삭제할 일기를 찾을 수 없습니다.');
     }
 
-    const dateString = formatDateKey(date);
-
-    const result = await apiRequest(`/diary?date=${dateString}`, {
+    // DELETE 요청 - 204 No Content 응답 예상
+    await apiRequest(`/diaries/${existingDiary.data.mdiaId}`, {
       method: 'DELETE',
     });
 
     return {
       success: true,
-      message: result.message || '일기가 삭제되었습니다.',
+      message: '일기가 삭제되었습니다.',
       data: {
-        deletedDate: dateString,
+        deletedId: existingDiary.data.mdiaId,
+        deletedDate: formatDateKey(date),
       },
     };
   } catch (error) {
@@ -177,45 +224,65 @@ const deleteDiary = async (date) => {
 
 /**
  * 현재 사용자의 모든 일기 조회
- * @returns {Promise<Object>} - 일기 목록
+ * Spring Boot Controller: GET /diaries/member/{memberId}/all
  */
 const getAllDiaries = async () => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error('로그인이 필요합니다.');
-    }
+    const userId = await getCurrentUserId();
 
-    const result = await apiRequest('/diary/all', {
+    const result = await apiRequest(`/diaries/member/${userId}/all`, {
       method: 'GET',
     });
 
-    const diaries = result.diaries.map((diary) => ({
+    // 응답이 배열인 경우 (Java Controller가 List<Diary> 반환)
+    const diaries = Array.isArray(result) ? result : [];
+
+    const mappedDiaries = diaries.map((diary) => ({
       mdiaId: diary.mdiaId,
-      mdiaMmemId: diary.mdiaMmemId,
+      mdiaMmemId: diary.member?.mmemid || userId,
       mdiaDate: diary.mdiaDate,
       mdiaContent: diary.mdiaContent,
       text: diary.mdiaContent,
       date: formatDateKey(diary.mdiaDate),
     }));
 
-    diaries.sort((a, b) => new Date(b.mdiaDate) - new Date(a.mdiaDate));
+    // 날짜순 정렬 (최신순)
+    mappedDiaries.sort((a, b) => new Date(b.mdiaDate) - new Date(a.mdiaDate));
 
     return {
       success: true,
       data: {
-        diaries,
-        totalCount: diaries.length,
+        diaries: mappedDiaries,
+        totalCount: mappedDiaries.length,
       },
     };
   } catch (error) {
     console.error('일기 목록 조회 중 오류:', error);
+
+    // 404 에러인 경우 (일기가 없는 경우)
+    if (error.message.includes('404')) {
+      return {
+        success: true,
+        data: {
+          diaries: [],
+          totalCount: 0,
+        },
+      };
+    }
+
     throw new Error('일기 목록을 불러올 수 없습니다.');
   }
 };
 
+// Mock API와 동일한 인터페이스를 위한 더미 함수들
+const getCurrentUser = () => {
+  // 이 함수는 호환성을 위해서만 존재, 실제로는 getCurrentUserId 사용
+  console.warn('getCurrentUser는 세션 기반에서 사용되지 않습니다.');
+  return null;
+};
+
 const BACK_DIARY_API = {
-  // 기본 CRUD (필수 기능만)
+  // 기본 CRUD
   getDiaryByDate,
   saveDiary,
   deleteDiary,
@@ -223,9 +290,9 @@ const BACK_DIARY_API = {
   // 목록 조회
   getAllDiaries,
 
-  // 유틸리티 (필요)
+  // 유틸리티
   formatDateKey,
-  getCurrentUser,
+  getCurrentUser, // 호환성을 위한 더미 함수
 };
 
 export default BACK_DIARY_API;
