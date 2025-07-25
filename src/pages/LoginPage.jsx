@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { ROUTES } from '../route/routes';
 import logo_nuki from '../img/logo_nuki.png';
 import S from '../styles/loginPage.style.js';
-import { USER_API } from './../services/apiService';
+import BACK_USER_API from './../services/back/userApi.js';
 
 function LoginPage() {
   const [currentForm, setCurrentForm] = useState('login'); // 'login', 'register', 'reset'
@@ -248,7 +248,7 @@ function LoginPage() {
       return;
     }
 
-    // 회원가입 USER_API 호출
+    // 회원가입 BACK_USER_API 호출
     const result = await register({
       id: formData.id,
       password: formData.password,
@@ -313,7 +313,7 @@ function LoginPage() {
     }
 
     try {
-      const result = await USER_API.sendVerificationEmail(formData.email);
+      const result = await BACK_USER_API.sendVerificationEmail(formData.email);
       if (result.success) {
         toast.success(result.message);
         setIsEmailCodeSent(true);
@@ -333,7 +333,7 @@ function LoginPage() {
     }
 
     try {
-      const result = await USER_API.verifyEmailCode(formData.email, emailVerificationCode);
+      const result = await BACK_USER_API.verifyEmailCode(formData.email, emailVerificationCode);
       if (result.success) {
         toast.success(result.message);
         setIsEmailVerified(true);

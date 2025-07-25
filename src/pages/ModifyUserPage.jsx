@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAuth from '../contexts/useAuth.jsx';
-import { USER_API } from '../services/apiService.js';
+import BACK_USER_API from '../services/back/userApi.js';
 import { ROUTES } from '../route/routes.js';
 import S from '../styles/modifyUserPage.style.js'; // 🔥 스타일 import
 
@@ -61,7 +61,7 @@ const ModifyUserPage = () => {
     setLoading(true);
 
     try {
-      const result = await USER_API.checkNicknameDuplicate(formData.nickname);
+      const result = await BACK_USER_API.checkNicknameDuplicate(formData.nickname);
 
       if (result.available) {
         toast.success(result.message);
@@ -181,7 +181,10 @@ const ModifyUserPage = () => {
 
     try {
       // 🔥 먼저 현재 비밀번호 확인
-      const passwordResult = await USER_API.verifyPassword(user.loginId, formData.currentPassword);
+      const passwordResult = await BACK_USER_API.verifyPassword(
+        user.loginId,
+        formData.currentPassword,
+      );
 
       if (!passwordResult.success) {
         toast.error('현재 비밀번호가 올바르지 않습니다.');
@@ -204,7 +207,7 @@ const ModifyUserPage = () => {
       }
 
       // 🔥 회원정보 수정 API 호출
-      const result = await USER_API.updateUserInfo(
+      const result = await BACK_USER_API.updateUserInfo(
         user.loginId,
         updateData,
         formData.currentPassword,

@@ -1,7 +1,7 @@
 // src/pages/ChallengePage.jsx
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { showError, showSuccess, showInfo, showWarning } from '../utils/toast';
-import { CHALLENGE_API } from '../services/apiService';
+import BACK_CHALLENGE_API from '../services/back/challengeApi.js';
 import S from '../styles/challengePage.style';
 
 const challengeStatus = {
@@ -31,7 +31,7 @@ function ChallengePage() {
   // API에서 가져온 챌린지 데이터
   const [allChallenges, setAllChallenges] = useState([]);
 
-  // Mock 소비 데이터 (CHALLENGE_API.getExpenseAmount 사용으로 대체 가능)
+  // Mock 소비 데이터 (BACK_CHALLENGE_API.getExpenseAmount 사용으로 대체 가능)
   const mockExpenseData = useMemo(
     () => [
       { date: '2025-01-01', amount: 50000 },
@@ -57,13 +57,13 @@ function ChallengePage() {
         setLoading(true);
 
         // 모든 챌린지 데이터 가져오기
-        const challengesResponse = await CHALLENGE_API.getAllChallenges();
+        const challengesResponse = await BACK_CHALLENGE_API.getAllChallenges();
         if (challengesResponse.success) {
           setAllChallenges(challengesResponse.data);
         }
 
         // 사용자 포인트 가져오기
-        const pointsResponse = await CHALLENGE_API.getUserPoints();
+        const pointsResponse = await BACK_CHALLENGE_API.getUserPoints();
         if (pointsResponse.success) {
           setUserPoints(pointsResponse.data.points);
         }
@@ -82,7 +82,7 @@ function ChallengePage() {
   const calculateCurrentAmount = useCallback(
     async (startDate, endDate = null) => {
       try {
-        const response = await CHALLENGE_API.getExpenseAmount(startDate, endDate);
+        const response = await BACK_CHALLENGE_API.getExpenseAmount(startDate, endDate);
         if (response.success) {
           return response.data.amount;
         }
@@ -271,11 +271,11 @@ function ChallengePage() {
 
       if (window.confirm(`'${challenge?.title}' 챌린지를 정말로 삭제하시겠습니까?`)) {
         try {
-          const response = await CHALLENGE_API.deleteChallenge(challengeId);
+          const response = await BACK_CHALLENGE_API.deleteChallenge(challengeId);
 
           if (response.success) {
             // 챌린지 목록 새로고침
-            const challengesResponse = await CHALLENGE_API.getAllChallenges();
+            const challengesResponse = await BACK_CHALLENGE_API.getAllChallenges();
             if (challengesResponse.success) {
               setAllChallenges(challengesResponse.data);
             }
@@ -380,15 +380,15 @@ function ChallengePage() {
 
         if (editingChallenge) {
           // 수정 모드
-          response = await CHALLENGE_API.updateChallenge(editingChallenge.id, formData);
+          response = await BACK_CHALLENGE_API.updateChallenge(editingChallenge.id, formData);
         } else {
           // 추가 모드
-          response = await CHALLENGE_API.createChallenge(formData);
+          response = await BACK_CHALLENGE_API.createChallenge(formData);
         }
 
         if (response.success) {
           // 챌린지 목록 새로고침
-          const challengesResponse = await CHALLENGE_API.getAllChallenges();
+          const challengesResponse = await BACK_CHALLENGE_API.getAllChallenges();
           if (challengesResponse.success) {
             setAllChallenges(challengesResponse.data);
           }

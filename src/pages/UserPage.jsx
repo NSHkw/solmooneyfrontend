@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ROUTES } from '../route/routes.js';
 import useAuth from '../contexts/useAuth.jsx';
-import { USER_API } from '../services/apiService.js'; // 🔥 직접 API import
+import BACK_USER_API from '../services/back/userApi.js'; // 🔥 직접 API import
 import S from '../styles/userPage.style.js';
 
 function UserPage() {
@@ -24,7 +24,7 @@ function UserPage() {
     setError(null);
 
     try {
-      const result = await USER_API.getUserInfo(user.loginId);
+      const result = await BACK_USER_API.getUserInfo(user.loginId);
 
       if (result.success) {
         setUserInfo(result.data.user);
@@ -95,7 +95,7 @@ function UserPage() {
 
     try {
       // 🔥 포인트 사용 API 호출 (실제 구현 시 필요)
-      // const result = await USER_API.usePoints(points);
+      // const result = await BACK_USER_API.usePoints(points);
       //
       // if (result.success) {
       //   toast.success(`${points.toLocaleString()} P가 사용되었습니다!`);
@@ -118,11 +118,6 @@ function UserPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // 🔥 새로고침 버튼
-  const handleRefresh = async () => {
-    await fetchUserInfo();
   };
 
   // 🔥 간단한 이미지 렌더링 함수

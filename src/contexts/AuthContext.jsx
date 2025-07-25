@@ -3,7 +3,7 @@
 
 import React, { createContext, useReducer } from 'react';
 import { toast } from 'react-toastify';
-import { USER_API } from '../services/apiService.js'; // 🔥 실제 백엔드 API 사용
+import BACK_USER_API from '../services/back/userApi.js';
 
 const AuthContext = createContext();
 
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'LOGIN_START' });
 
     try {
-      const result = await USER_API.login(credentials);
+      const result = await BACK_USER_API.login(credentials);
       console.log('로그인 결과:', result);
 
       if (result.success) {
@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await USER_API.register(userData);
+      const result = await BACK_USER_API.register(userData);
 
       if (result.success) {
         toast.success(result.message);
@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }) => {
   // 🔥 아이디 중복 확인
   const checkIdDuplicateHandler = async (id) => {
     try {
-      const result = await USER_API.checkIdDuplicate(id);
+      const result = await BACK_USER_API.checkIdDuplicate(id);
       return result;
     } catch (error) {
       toast.error('아이디 중복 확인 중 오류가 발생했습니다.');
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }) => {
   // 🔥 닉네임 중복 확인
   const checkNicknameDuplicateHandler = async (nickname) => {
     try {
-      const result = await USER_API.checkNicknameDuplicate(nickname);
+      const result = await BACK_USER_API.checkNicknameDuplicate(nickname);
       return result;
     } catch (error) {
       toast.error('닉네임 중복 확인 중 오류가 발생했습니다.');
@@ -153,7 +153,11 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await USER_API.updateUserInfo(state.user.loginId, updateData, currentPassword);
+      const result = await BACK_USER_API.updateUserInfo(
+        state.user.loginId,
+        updateData,
+        currentPassword,
+      );
 
       if (result.success) {
         // 상태 업데이트
@@ -183,7 +187,7 @@ export const AuthProvider = ({ children }) => {
     action({ type: 'SET_LOADING', payload: true });
 
     try {
-      const result = await USER_API.deleteAccount(password); // 🔥 userId 파라미터 제거
+      const result = await BACK_USER_API.deleteAccount(password);
 
       if (result.success) {
         // 상태 초기화
@@ -207,7 +211,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const result = await USER_API.getUserInfo(state.user.loginId);
+      const result = await BACK_USER_API.getUserInfo(state.user.loginId);
 
       if (result.success) {
         // 상태 업데이트
@@ -227,8 +231,7 @@ export const AuthProvider = ({ children }) => {
   // 🔥 로그아웃 함수
   const logoutHandler = async () => {
     try {
-      // 서버에 로그아웃 요청
-      await USER_API.logout();
+      await BACK_USER_API.logout();
     } catch (error) {
       console.error('로그아웃 요청 실패:', error);
       // 에러가 나도 클라이언트는 로그아웃 처리
@@ -248,8 +251,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      // 🔥 백엔드에서 userId를 요구하므로 전달
-      const response = await USER_API.verifyUser(state.user.loginId);
+      console.log('🔍 checkUserAuth: 검증 시작, userId:', state.user.loginId);
+
+      // 🔥 잠시 대기 후 검증 (세션 설정 시간 확보)
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const response = await BACK_USER_API.verifyUser(state.user.loginId);
+      console.log('🔍 checkUserAuth: 검증 결과:', response);
 
       if (response.success) {
         // 세션이 유효하면 사용자 정보 업데이트 (최신 정보 반영)
@@ -283,7 +291,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const result = await USER_API.verifyPassword(state.user.loginId, password);
+      const result = await BACK_USER_API.verifyPassword(state.user.loginId, password);
       return result;
     } catch (error) {
       toast.error(error.message);
@@ -311,7 +319,7 @@ export const AuthProvider = ({ children }) => {
     checkNicknameDuplicate: checkNicknameDuplicateHandler,
 
     // 회원정보 관리 함수들
-    updateUserInfo: updateUserInfoHandler, // 🔥 currentPassword 파라미터 추가
+    updateUserInfo: updateUserInfoHandler,
     deleteAccount: deleteAccountHandler,
     refreshUserInfo,
     verifyPassword: verifyPasswordHandler,

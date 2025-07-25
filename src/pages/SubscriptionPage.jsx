@@ -23,7 +23,7 @@ import {
 } from 'recharts';
 import { showSuccess, showError, showWarning, showInfo } from '../utils/toast';
 import S from '../styles/subscriptionPage.style';
-import { SUBSCRIPTION_API } from '../services/apiService.js';
+import BACK_SUBSCRIPTION_API from '../services/back/subscriptionApi.js';
 
 const alignStyle = {
   LATEST: 'latest',
@@ -57,7 +57,7 @@ function SubscriptionPage() {
   const fetchSubscriptions = async () => {
     try {
       setLoading(true);
-      const response = await SUBSCRIPTION_API.getSubscriptions();
+      const response = await BACK_SUBSCRIPTION_API.getSubscriptions();
       setExpenses(response.data);
     } catch (error) {
       showError('구독 데이터를 불러오는데 실패했습니다.');
@@ -70,7 +70,7 @@ function SubscriptionPage() {
   // 카테고리 데이터 가져오기
   const fetchCategories = async () => {
     try {
-      const response = await SUBSCRIPTION_API.getCategories();
+      const response = await BACK_SUBSCRIPTION_API.getCategories();
       setCategories(response.data);
     } catch (error) {
       showError('카테고리 데이터를 불러오는데 실패했습니다.');
@@ -257,7 +257,7 @@ function SubscriptionPage() {
   // 지출 완료 처리
   const handleCompletePayment = async (expense) => {
     try {
-      const response = await SUBSCRIPTION_API.completePayment(expense.mexpId);
+      const response = await BACK_SUBSCRIPTION_API.completePayment(expense.mexpId);
 
       // 로컬 상태 업데이트 대신 서버에서 데이터 다시 가져오기
       await fetchSubscriptions();
@@ -287,10 +287,13 @@ function SubscriptionPage() {
 
       if (editingSubscription) {
         // 수정 모드
-        response = await SUBSCRIPTION_API.updateSubscription(editingSubscription.mexpId, formData);
+        response = await BACK_SUBSCRIPTION_API.updateSubscription(
+          editingSubscription.mexpId,
+          formData,
+        );
       } else {
         // 추가 모드
-        response = await SUBSCRIPTION_API.addSubscription(formData);
+        response = await BACK_SUBSCRIPTION_API.addSubscription(formData);
       }
 
       // 서버에서 최신 데이터 가져오기
@@ -332,7 +335,7 @@ function SubscriptionPage() {
 
     if (window.confirm(`'${expense?.mexpDec}' 구독을 정말로 삭제하시겠습니까?`)) {
       try {
-        const response = await SUBSCRIPTION_API.deleteSubscription(mexpId);
+        const response = await BACK_SUBSCRIPTION_API.deleteSubscription(mexpId);
 
         // 서버에서 최신 데이터 가져오기
         await fetchSubscriptions();

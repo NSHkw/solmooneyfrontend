@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAuth from '../contexts/useAuth.jsx';
-import { USER_API } from '../services/apiService.js';
 import { ROUTES } from '../route/routes.js';
 import S from '../styles/withdrawalPage.style.js'; // 🔥 스타일 import
+import BACK_USER_API from './../services/back/userApi';
 
 const WithdrawalPage = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const WithdrawalPage = () => {
     navigate(ROUTES.USER);
   };
 
-  // 🔥 1단계: 비밀번호 확인 - USER_API 직접 호출
+  // 🔥 1단계: 비밀번호 확인 - BACK_USER_API 직접 호출
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
 
@@ -40,7 +40,7 @@ const WithdrawalPage = () => {
     setLoading(true);
 
     try {
-      const result = await USER_API.verifyPassword(user.loginId, password);
+      const result = await BACK_USER_API.verifyPassword(user.loginId, password);
 
       if (result.success) {
         setCurrentStep(2);
@@ -56,7 +56,7 @@ const WithdrawalPage = () => {
     }
   };
 
-  // 🔥 2단계: 최종 회원탈퇴 확인 - USER_API 직접 호출
+  // 🔥 2단계: 최종 회원탈퇴 확인 - BACK_USER_API 직접 호출
   const handleFinalConfirm = async () => {
     if (!user) {
       toast.error('로그인이 필요합니다.');
@@ -67,7 +67,7 @@ const WithdrawalPage = () => {
     setLoading(true);
 
     try {
-      const result = await USER_API.deleteAccount(password);
+      const result = await BACK_USER_API.deleteAccount(password);
 
       if (result.success) {
         setCurrentStep(3);
