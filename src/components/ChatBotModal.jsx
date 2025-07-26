@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import chatImg from '@img/chatmooney.png';
 import DOMPurify from 'dompurify';
-import BACK_USER_API from '../services/back/userApi.js';
 
 export default function ChatBotModal({ onClose }) {
   const [showOptions, setShowOptions] = useState(false);
@@ -30,28 +29,53 @@ export default function ChatBotModal({ onClose }) {
     try {
       const savedLoginState = localStorage.getItem('isYouLogined');
 
-      console.log('🟡 raw loginUser:', savedLoginState);
+      console.log(savedLoginState);
 
-      if (!savedLoginState) {
-        throw new Error('❌ 로컬스토리지에 loginUser 없음');
+      let parsedState = {};
+
+      if (savedLoginState) {
+        parsedState = JSON.parse(savedLoginState);
+        console.log(parsedState);
+        // 출력: { nick: "고먐미", id: "hhhh234", point: 0 }
+
+        console.log(parsedState.nick); // 고먐미
+      } else {
+        console.log('로그인 상태가 저장되어 있지 않습니다.');
       }
 
-      let parsedData = {};
-      try {
-        parsedData = JSON.parse(savedLoginState);
-      } catch (err) {
-        throw new Error('❌ loginUser 파싱 실패');
+      // const parsedData = {}
+
+      // try {
+      //   parsedData = JSON.parse(savedLoginState);
+      // } catch (err) {
+      //   throw new Error('❌ loginUser 파싱 실패');
+      // }
+
+      // console.log('🟢 parsedData:', parsedData.id);
+
+      // if (!parsedData?.id) {
+      //   throw new Error('❌ loginId 없음');
+      // }
+
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/do.MeminfoCheck`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          regid: parsedState.id,
+        }),
+      });
+
+      console.log('lalalalalal', response);
+
+      const result = await response.json();
+      console.log('✅ 사용자 정보 응답:', result);
+
+      if (!result?.Meminfo) {
+        throw new Error('❌ 사용자 정보를 찾을 수 없습니다.');
       }
 
-      console.log('🟢 parsedData:', parsedData.loginId);
-
-      if (!parsedData?.loginId) {
-        throw new Error('❌ loginId 없음');
-      }
-
-      const result = BACK_USER_API.getUserInfo(parsedData.loginId);
-
-      setUserinfo(result.Meminfo);
+      setUserinfo(result?.Meminfo);
     } catch (error) {
       console.error('🚨 userinfoget 오류:', error.message);
     }
@@ -68,7 +92,7 @@ export default function ChatBotModal({ onClose }) {
     formData.append('userinfo', userinfo?.id || 'unknown');
 
     try {
-      const res = await fetch('http://192.168.0.20:7474/llama3-api', {
+      const res = await fetch('http://localhost:7474/llama3-api', {
         method: 'POST',
         body: formData,
         credentials: 'include',

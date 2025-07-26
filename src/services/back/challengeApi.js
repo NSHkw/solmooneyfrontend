@@ -22,7 +22,8 @@ const getAllChallenges = async () => {
   try {
     // 세션 쿠키 방식: 서버에서 자동으로 현재 로그인된 사용자의 챌린지를 반환
     // 백엔드 컨트롤러에서 세션을 통해 memberId를 얻어서 처리해야 함
-    const response = await fetch('/api/challenges/my', {
+    // member/memberId
+    const response = await fetch('/challenges/member/', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ const createChallenge = async (challengeData) => {
     };
 
     // 세션 쿠키 방식: 서버에서 자동으로 현재 로그인된 사용자로 챌린지 생성
-    const response = await fetch('/api/challenges', {
+    const response = await fetch('/challenges', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

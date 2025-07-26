@@ -26,7 +26,7 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, checkUserAuth } = useAuth();
+  const { user, logout, checkSession } = useAuth();
   const containerRef = useRef(null);
   const [hasNotification, setHasNotification] = useState(true);
 
@@ -44,7 +44,7 @@ const Sidebar = ({
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkUserAuth();
+    const isValid = await checkSession();
     if (!isValid) {
       return;
     }
@@ -60,7 +60,7 @@ const Sidebar = ({
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkUserAuth();
+    const isValid = await checkSession();
     if (isValid) {
       navigate(ROUTES.ROOT);
     }
@@ -70,7 +70,7 @@ const Sidebar = ({
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkUserAuth();
+    const isValid = await checkSession();
     if (isValid) {
       navigate(ROUTES.USER);
     }
