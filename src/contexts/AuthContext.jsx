@@ -111,7 +111,7 @@ export const AuthProvider = ({ children }) => {
         console.log('세션 연장: ', result.userInfo);
       } else {
         // 🔥 세션 무효 - 로그아웃 처리
-        handleLogout();
+        // handleLogout();
         console.log('세션 무효 - 로그아웃 처리');
       }
     } catch (error) {

@@ -26,7 +26,7 @@ const Sidebar = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout, checkSession } = useAuth();
+  const { user, logout } = useAuth();
   const containerRef = useRef(null);
   const [hasNotification, setHasNotification] = useState(true);
 
@@ -40,49 +40,41 @@ const Sidebar = ({
     { id: 'subscription', label: '구독', icon: pencilImg, path: ROUTES.SUBSCRIPTION },
   ];
 
-  const handleMenuClick = async (path, itemId) => {
+  const handleMenuClick = (path, itemId) => {
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkSession();
-    if (!isValid) {
-      return;
-    }
-
+    // ✅ 세션 체크 제거 - 바로 이동
     if (itemId === 'notify') {
       onOpenNotification();
     } else if (path) {
-      navigate(path);
+      navigate(path); // 바로 이동
     }
   };
 
-  const handleRootClick = async () => {
+  const handleRootClick = () => {
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkSession();
-    if (isValid) {
-      navigate(ROUTES.ROOT);
-    }
+    // ✅ 세션 체크 제거 - 바로 이동
+    navigate(ROUTES.ROOT);
   };
 
-  const handleUserClick = async () => {
+  const handleUserClick = () => {
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
-    const isValid = await checkSession();
-    if (isValid) {
-      navigate(ROUTES.USER);
-    }
+    // ✅ 세션 체크 제거 - 바로 이동
+    navigate(ROUTES.USER);
   };
 
   const handleLogout = () => {
     // 🔥 사이드바가 닫혀있으면 클릭 무시
     if (!isOpen) return;
 
+    // ✅ 로그아웃만 확인 후 바로 실행
     if (window.confirm('정말 로그아웃하시겠습니까?')) {
       logout();
-      navigate(ROUTES.LOGIN);
     }
   };
 
