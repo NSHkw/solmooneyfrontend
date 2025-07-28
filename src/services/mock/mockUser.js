@@ -1,5 +1,3 @@
-// src/services/mock/mockUser.js
-
 import MOCKDATA from '../../assets/mockData.js';
 
 //? 로그인 API - sessionStorage로 세션 관리

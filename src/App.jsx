@@ -1,4 +1,3 @@
-// src/App.jsx
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';

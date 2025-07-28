@@ -1,3 +1,3 @@
-const BACK_EXPENSE_API = {};
+const EXPENSE_API = {};
 
-export default BACK_EXPENSE_API;
+export default EXPENSE_API;

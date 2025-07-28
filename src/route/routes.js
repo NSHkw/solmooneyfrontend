@@ -1,12 +1,11 @@
-// src/route/routes.js
 export const ROUTES = {
-  ROOT: '/',
   LOGIN: '/login',
-  DIARY: '/diary',
+  ROOT: '/',
   CHALLENGE: '/challenge',
-  ACCOUNT_BOOK: '/account-book',
-  USER: '/user',
+  DIARY: '/diary',
+  ACCOUNT_BOOK: '/accountbook',
   SUBSCRIPTION: '/subscription',
+  USER: '/user',
+  MODIFY_USER: '/modifyuser',
   WITHDRAWAL: '/withdrawal',
-  MODIFY_USER: '/modify-user',
 };

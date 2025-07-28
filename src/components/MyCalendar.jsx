@@ -1,27 +1,21 @@
-// src/components/MyCalendar.jsx
-import { useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import '../css/calendar.css';
 
-function MyCalendar() {
-  const [value, setValue] = useState(new Date());
-
-  // 날짜별 수입/지출 데이터
-  const financeData = {
-    '2025-07-05': { income: 30000, expense: 10000 },
-    '2025-07-08': { income: 0, expense: 15000 },
-    '2025-07-09': { income: 7000, expense: 0 },
-  };
-
+function MyCalendar({ value, onChange, financeData }) {
   function formatDate(date) {
-    return date.toISOString().split('T')[0];
+    const year = date.getFullYear();
+    // getMonth()는 0부터 시작하므로 1을 더해줍니다.
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+
   }
 
   return (
     <div className="calendar-wrapper">
       <Calendar
-        onChange={setValue}
+        onChange={onChange}
         value={value}
         calendarType="gregory"
         showNeighboringMonth={false}

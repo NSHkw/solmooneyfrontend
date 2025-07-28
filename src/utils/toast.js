@@ -1,4 +1,3 @@
-// src/utils/toast.js
 import { toast } from 'react-toastify';
 
 /**

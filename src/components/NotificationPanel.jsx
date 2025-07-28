@@ -1,4 +1,3 @@
-// src/components/NotificationPanel.jsx
 import { useNavigate } from 'react-router-dom';
 import MOCKDATA from '../assets/mockData.js';
 

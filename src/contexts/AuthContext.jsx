@@ -44,6 +44,8 @@ const authReducer = (state, action) => {
       return { ...state, error: null };
     case 'UPDATE_USER':
       return { ...state, user: { ...state.user, ...action.payload }, loading: false };
+    case 'SET_INITIAL_CHECK_DONE':
+      return { ...state, initialCheckDone: true };
     default:
       return state;
   }
@@ -53,8 +55,9 @@ export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, {
     isAuthenticated: false,
     user: null,
-    loading: true, // 🔥 초기 로딩 상태
+    loading: true,
     error: null,
+    initialCheckDone: false, // 🔥 이것만 추가
   });
 
   // 🔥 세션 체크 함수 - URL 통일
@@ -119,6 +122,7 @@ export const AuthProvider = ({ children }) => {
       handleLogout();
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
+      dispatch({ type: 'SET_INITIAL_CHECK_DONE' }); // 🔥 이것만 추가
     }
   }, []);
 

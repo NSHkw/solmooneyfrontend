@@ -1,4 +1,3 @@
-// src/services/mock/mockDiary.js
 import MOCKDATA from '../../assets/mockData';
 
 /**
