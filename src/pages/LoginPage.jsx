@@ -209,7 +209,7 @@ function LoginPage() {
     }
 
     if (!isIdChecked) {
-      toast.error('아이디 중복확인을 해주세요!');
+      toast.error('아이디 중복체크를 진행해라!');
       return;
     }
 
@@ -270,7 +270,8 @@ function LoginPage() {
 
     try {
       const result = await checkIdDuplicate(formData.id);
-      if (result.available) {
+
+      if (result.idpossible) {
         toast.success(result.message);
         setIsIdChecked(true);
       } else {
@@ -292,7 +293,7 @@ function LoginPage() {
 
     try {
       const result = await checkNicknameDuplicate(formData.nickname);
-      if (result.available) {
+      if (result.nickpossible) {
         toast.success(result.message);
         setIsNicknameChecked(true);
       } else {
@@ -318,7 +319,8 @@ function LoginPage() {
         toast.success(result.message);
         setIsEmailCodeSent(true);
         if (result.__dev_code) {
-          toast.info(`개발용 인증코드: ${result.__dev_code}`);
+          // 이 토스트 메세지의 경우 개발 환경에서만 작용하도록
+          toast.info(`개발용 인증코드: ${result.__dev_code}`, { autoClose: 5000 });
         }
       }
     } catch (error) {
@@ -405,6 +407,7 @@ function LoginPage() {
               value={formData.id}
               onChange={handleInputChange}
               placeholder="아이디를 입력하세요"
+              disabled={isIdChecked} // 중복확인 통과 시 비활성
             />
           </motion.div>
         </S.InputGroup>
@@ -421,7 +424,6 @@ function LoginPage() {
             />
           </motion.div>
         </S.InputGroup>
-
         <motion.button
           type="submit"
           disabled={loading}
@@ -446,6 +448,7 @@ function LoginPage() {
         </motion.button>
       </motion.form>
 
+      {/*
       <motion.div variants={itemVariants}>
         <S.LinkSection>
           <motion.button
@@ -515,6 +518,7 @@ function LoginPage() {
           </motion.button>
         ))}
       </motion.div>
+      */}
 
       <motion.div
         variants={itemVariants}

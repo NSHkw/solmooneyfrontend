@@ -7,11 +7,9 @@ import '../css/homepage.css';
 import chatImg from '../img/chatbotmooney.png';
 import ChatBotModal from '../components/ChatBotModal';
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const BASE_URL = 'http://localhost:7474';
-const MEMBER_ID = 'hhhh234';
-
-
+let MEMBER_ID = null;
 
 function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -27,7 +25,7 @@ function HomePage() {
     const format = (d) => {
       const year = d.getFullYear();
       const month = (d.getMonth() + 1).toString().padStart(2, '0'); // 월은 0부터 시작하므로 +1, 두 자리로 포맷
-      const day = d.getDate().toString().padStart(2, '0');         // 일은 두 자리로 포맷
+      const day = d.getDate().toString().padStart(2, '0'); // 일은 두 자리로 포맷
       return `${year}-${month}-${day}`;
     };
 
@@ -71,7 +69,26 @@ function HomePage() {
     setDayDetail(data);
   };
 
+  const getUserinfo = () => {
+    const savedLoginState = localStorage.getItem('isYouLogined');
+
+    console.log(savedLoginState);
+
+    let parsedState = {};
+
+    if (savedLoginState) {
+      parsedState = JSON.parse(savedLoginState);
+      console.log(parsedState);
+      console.log(parsedState.nick);
+      MEMBER_ID = parsedState.id;
+      console.log(`idget${parsedState.id}`);
+    } else {
+      console.log('로그인 상태가 저장되어 있지 않습니다.');
+    }
+  };
+
   useEffect(() => {
+    getUserinfo();
     fetchMonthlyData();
   }, [selectedDate]);
 
